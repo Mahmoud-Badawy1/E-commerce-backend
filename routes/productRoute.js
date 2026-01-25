@@ -18,6 +18,26 @@ router
     productController.createProduct
   );
 
+// Seller-specific routes
+router.use("/seller", authController.protect, authController.allowedTo("seller"));
+
+router
+  .route("/seller")
+  .get(productController.getSellerProducts)
+  .post(
+    productValidator.createProductValidator,
+    productController.createSellerProduct
+  );
+
+router
+  .route("/seller/:id")
+  .get(productController.getSellerProduct)
+  .put(
+    productValidator.updateProductValidator,
+    productController.updateSellerProduct
+  )
+  .delete(productController.deleteSellerProduct);
+
 router
   .route("/:id")
   .get(

@@ -29,13 +29,20 @@ exports.getAllProductsInCart = asyncHandler(async (req, res, next) => {
 
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
   const { productId, color } = req.body;
+  console.log("Adding product to cart",productId,color);
+  
   const product = await productModel.findById(productId);
+  console.log("Found product:",product);
+  
   let cart = await cartModel.findOne({ user: req.user._id });
+  console.log("Current cart:",cart);
+
   if (!cart) {
     cart = await cartModel.create({
       user: req.user._id,
       cartItems: [{ product: productId, color: color, price: product.price }],
     });
+    console.log("Created new cart:",cart);
   } else {
     const productIndex = cart.cartItems.findIndex(
       (item) => item.product.toString() == productId && item.color == color

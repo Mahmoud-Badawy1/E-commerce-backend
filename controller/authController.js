@@ -21,14 +21,15 @@ exports.logIn = asyncHandler(async (req, res, next) => {
     return next(new ApiError("E-Mail or password is wrong", 400));
   }
 
-  if (user.active === false) {
-    return next(
-      new ApiError(
-        "Your account is not active, please contact the administrator.",
-        403
-      )
-    );
-  }
+  // green flag
+  // if (user.active === false) {
+  //   return next(
+  //     new ApiError(
+  //       "Your account is not active, please contact the administrator.",
+  //       403
+  //     )
+  //   );
+  // }
 
   const isPasswordValid = await bcrypt.compare(
     req.body.password,
@@ -204,11 +205,11 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
   const currentUser = await userModel.findOne({
     _id: decoded.userId,
-    active: true,
+    // active: true,
   });
-  if (!currentUser) {
-    return next(new ApiError("User not found or not activated", 401));
-  }
+  // if (!currentUser) {
+  //   return next(new ApiError("User not found or not activated", 401));
+  // }
 
   if (currentUser.changedPasswordAt) {
     const CPTFormat = parseInt(
@@ -228,6 +229,8 @@ exports.protect = asyncHandler(async (req, res, next) => {
 exports.allowedTo = (...roles) =>
   asyncHandler(async (req, res, next) => {
     if (!roles.includes(req.user.role)) {
+      console.log(req.user);
+      
       return next(new ApiError("You are not allowed to use this route", 403));
     }
     next();

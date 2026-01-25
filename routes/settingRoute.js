@@ -14,7 +14,8 @@ router
   )
   .post(
     authController.protect,
-    authController.allowedTo("admin"),
+    // green flag
+    authController.allowedTo("admin","seller"),
     settingController.addSetting
   );
 

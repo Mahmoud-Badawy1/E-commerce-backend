@@ -5,20 +5,33 @@ const orderModel = require("../models/orderModel");
 const cartModel = require("../models/cartModel");
 const userModel = require("../models/userModel");
 const productModel = require("../models/productModel");
+const sellerModel = require("../models/sellerModel");
+const ApiFeatures = require("../utils/apiFeatures");
 const settingController = require("./settingController");
+const mongoose = require("mongoose");
 const controllerHandler = require("./controllerHandler");
 
 exports.createCashOrder = asyncHandler(async (req, res, next) => {
   const taxes = await settingController.useSettings("taxes");
   const shipping = await settingController.useSettings("shipping");
 
+  console.log(taxes, shipping);
+  
   const cart = await cartModel.findById(req.params.id);
+  console.log(cart);
+  
   if (!cart) {
     return next(new ApiError("No cart found for this user", 404));
   }
-  const cartPrice = cart.totalPriceAfterDiscount
-    ? cart.totalPriceAfterDiscount
-    : cart.totalPrice;
+  const cartPrice = cart.cartItems?.reduce((current, next)=>{
+    return current + next.price
+  }, 0)
+  // green flag
+    //   const cartPrice = cart.totalPriceAfterDiscount
+    // ? cart.totalPriceAfterDiscount
+    // : cart.totalPrice
+    console.log("cartPrice= ",cartPrice);
+    
   const totalOrderPrice = cartPrice + (cartPrice * taxes) / 100 + shipping;
   const order = await orderModel.create({
     customer: req.user._id,
@@ -226,3 +239,335 @@ exports.filterOrderForUsers = asyncHandler(async (req, res, next) => {
 exports.getAllOrders = controllerHandler.getAll(orderModel);
 
 exports.deleteOrder = controllerHandler.delete(orderModel);
+
+// ========== Seller specific controllers ==========
+
+// Helper to ensure order contains at least one product of this seller
+const ensureSellerOwnsOrder = async (sellerId, order) => {
+  if (!order) return false;
+  const sellerProducts = await productModel
+    .find({ seller: sellerId })
+    .select("_id");
+  const productIds = sellerProducts.map((p) => p._id.toString());
+  const hasProduct = order.items.some((item) =>
+    productIds.includes(item.product.toString())
+  );
+  return hasProduct;
+};
+
+// List orders for logged-in seller with filters and pagination
+exports.getSellerOrders = asyncHandler(async (req, res, next) => {
+  const seller = await sellerModel.findOne({ userId: req.user._id });
+  if (!seller) {
+    return next(new ApiError("Seller profile not found", 404));
+  }
+
+  console.log("seller",seller);
+  
+  // Build base match conditions using direct sellerId filter
+  const matchConditions = {
+    "items.product.seller": seller._id,  // Direct filter on sellerId in product
+  };
+
+  // Status filter
+  if (req.query.status && req.query.status !== "all") {
+    matchConditions.status = req.query.status;
+  }
+
+  // Payment status filter
+  if (req.query.paymentStatus && req.query.paymentStatus !== "all") {
+    matchConditions.isPaid = req.query.paymentStatus === "paid";
+  }
+
+  // Date range filter
+  if (req.query.startDate || req.query.endDate) {
+    matchConditions.createdAt = {};
+    if (req.query.startDate) {
+      matchConditions.createdAt.$gte = new Date(req.query.startDate);
+    }
+    if (req.query.endDate) {
+      matchConditions.createdAt.$lte = new Date(req.query.endDate);
+    }
+  }
+
+  // Count total documents
+  const countPipeline = [
+    { $match: matchConditions },
+    { $count: "total" }
+  ];
+  const countResult = await orderModel.aggregate(countPipeline);
+  const documentsCount = countResult[0]?.total || 0;
+
+  // Pagination
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // Sorting
+  const sortOptions = {};
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(',').join(' ');
+    sortOptions[sortBy] = 1;
+  } else {
+    sortOptions.createdAt = -1; // Default sort
+  }
+
+  // Fetch orders with populated products and filter items
+  const orders = await orderModel.aggregate([
+    { $match: matchConditions },
+    {
+      $lookup: {
+        from: 'products',
+        localField: 'items.product',
+        foreignField: '_id',
+        as: 'productDetails'
+      }
+    },
+    {
+      $addFields: {
+        items: {
+          $map: {
+            input: '$items',
+            as: 'item',
+            in: {
+              $mergeObjects: [
+                '$$item',
+                {
+                  product: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: '$productDetails',
+                          cond: { $eq: ['$$this._id', '$$item.product'] }
+                        }
+                      },
+                      0
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        productDetails: 0  // Remove temp field
+      }
+    },
+    { $sort: sortOptions },
+    { $skip: skip },
+    { $limit: limit }
+  ]);
+
+  console.log("orders",orders);
+  
+  // Filter items to only seller's products and calculate totals
+  const filteredOrders = orders.map((order) => {
+    const sellerItems = order.items.filter((item) =>
+      item.product?.seller?.toString() === seller._id.toString()
+    );
+
+    const sellerCartPrice = sellerItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const sellerTaxes = (sellerCartPrice * (order.taxes / order.cartPrice)) || 0;
+    const sellerTotal = sellerCartPrice + sellerTaxes;
+
+    return {
+      ...order,
+      items: sellerItems,
+      sellerCartPrice,
+      sellerTaxes,
+      sellerTotal,
+    };
+  }).filter((order) => order.items.length > 0);
+
+  // Counts by status
+  const countsAggregation = await orderModel.aggregate([
+    { $match: matchConditions },
+    {
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const counts = {
+    all: documentsCount,
+    pending: 0,
+    Approved: 0,
+    shipping: 0,
+    completed: 0,
+    cancelled: 0,
+  };
+
+  countsAggregation.forEach((item) => {
+    counts[item._id] = item.count;
+  });
+
+  const paginationResult = {
+    currentPage: page,
+    totalPages: Math.ceil(documentsCount / limit),
+    totalItems: documentsCount,
+    itemsPerPage: limit,
+  };
+
+  res.status(200).json({
+    status: "success",
+    results: filteredOrders.length,
+    paginationResult,
+    counts,
+    data: filteredOrders,
+  });
+});
+
+// Get single order for seller
+exports.getSellerOrderDetails = asyncHandler(async (req, res, next) => {
+  const seller = await sellerModel.findOne({ userId: req.user._id });
+  if (!seller) {
+    return next(new ApiError("Seller profile not found", 404));
+  }
+
+  // Fetch order with populated products
+  const order = await orderModel.aggregate([
+    { $match: { _id: mongoose.Types.ObjectId(req.params.id) } },
+    {
+      $lookup: {
+        from: 'products',
+        localField: 'items.product',
+        foreignField: '_id',
+        as: 'productDetails'
+      }
+    },
+    {
+      $addFields: {
+        items: {
+          $map: {
+            input: '$items',
+            as: 'item',
+            in: {
+              $mergeObjects: [
+                '$$item',
+                {
+                  product: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: '$productDetails',
+                          cond: { $eq: ['$$this._id', '$$item.product'] }
+                        }
+                      },
+                      0
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        productDetails: 0
+      }
+    }
+  ]);
+
+  if (!order || order.length === 0) {
+    return next(new ApiError("No order found with this ID", 404));
+  }
+
+  const orderData = order[0];
+
+  // Filter items to only seller's products
+  const sellerItems = orderData.items.filter((item) =>
+    item.product?.seller?.toString() === seller._id.toString()
+  );
+
+  if (sellerItems.length === 0) {
+    return next(new ApiError("You are not allowed to access this order", 403));
+  }
+
+  // Calculate seller-specific totals
+  const sellerCartPrice = sellerItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const sellerTaxes = (sellerCartPrice * (orderData.taxes / orderData.cartPrice)) || 0;
+  const sellerTotal = sellerCartPrice + sellerTaxes;
+
+  const filteredOrder = {
+    ...orderData,
+    items: sellerItems,
+    sellerCartPrice,
+    sellerTaxes,
+    sellerTotal,
+  };
+
+  res.status(200).json({ status: "success", data: filteredOrder });
+});
+
+// Update order status/payment for seller
+exports.updateSellerOrder = asyncHandler(async (req, res, next) => {
+  const seller = await sellerModel.findOne({ userId: req.user._id });
+  if (!seller) {
+    return next(new ApiError("Seller profile not found", 404));
+  }
+
+  const order = await orderModel.findById(req.params.id);
+  if (!order) {
+    return next(new ApiError("No order found with this ID", 404));
+  }
+
+  const ownsOrder = await ensureSellerOwnsOrder(seller._id, order);
+  if (!ownsOrder) {
+    return next(new ApiError("You are not allowed to update this order", 403));
+  }
+
+  if (typeof req.body.isPaid === "boolean") {
+    order.isPaid = req.body.isPaid;
+    order.paidAt = req.body.isPaid ? Date.now() : undefined;
+  }
+
+  if (req.body.status) {
+    order.status = req.body.status;
+    if (req.body.status === "completed" || req.body.status === "delivered") {
+      order.deliveredAt = Date.now();
+    }
+  }
+
+  if (req.body.paymentMethod) {
+    order.paymentMethod = req.body.paymentMethod;
+  }
+
+  await order.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Order updated successfully",
+    data: order,
+  });
+});
+
+// Delete order for seller (if business allows)
+exports.deleteSellerOrder = asyncHandler(async (req, res, next) => {
+  const seller = await sellerModel.findOne({ userId: req.user._id });
+  if (!seller) {
+    return next(new ApiError("Seller profile not found", 404));
+  }
+
+  const order = await orderModel.findById(req.params.id);
+  if (!order) {
+    return next(new ApiError("No order found with this ID", 404));
+  }
+
+  const ownsOrder = await ensureSellerOwnsOrder(seller._id, order);
+  if (!ownsOrder) {
+    return next(new ApiError("You are not allowed to delete this order", 403));
+  }
+
+  await orderModel.findByIdAndDelete(req.params.id);
+
+  res
+    .status(200)
+    .json({ status: "success", message: "Order deleted successfully" });
+});

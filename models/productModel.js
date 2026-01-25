@@ -67,6 +67,10 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       required: [true, "Product must belong to main category"],
     },
+    seller: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Seller",
+    },
     ratingsAverage: {
       type: Number,
       min: [1, "rating must be above or equal 1"],

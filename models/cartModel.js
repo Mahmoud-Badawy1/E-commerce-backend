@@ -33,7 +33,7 @@ const cartSchema = new mongoose.Schema(
     paymobOrderId: {
       type: String,
       required: false,
-      unique: true,
+      // unique: true,
     },
   },
   {

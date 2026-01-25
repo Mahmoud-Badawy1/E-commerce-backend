@@ -1,0 +1,10 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Plan Seller Product Control",
+			"type": "shell",
+			"command": "echo 'Plan for Seller Product Control Implementation'"
+		}
+	]
+}
