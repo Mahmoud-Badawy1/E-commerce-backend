@@ -22,6 +22,10 @@ const orderSchema = new mongoose.Schema(
         price: {
           type: Number,
         },
+        seller: {
+          type: mongoose.Schema.ObjectId,
+          ref: "Seller",
+        },
       },
     ],
     cartPrice: {

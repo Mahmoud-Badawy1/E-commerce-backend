@@ -15,10 +15,7 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
   const taxes = await settingController.useSettings("taxes");
   const shipping = await settingController.useSettings("shipping");
 
-  console.log(taxes, shipping);
-  
-  const cart = await cartModel.findById(req.params.id);
-  console.log(cart);
+  const cart = await cartModel.findById(req.params.id).populate('cartItems.product', 'seller');
   
   if (!cart) {
     return next(new ApiError("No cart found for this user", 404));
@@ -26,16 +23,17 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
   const cartPrice = cart.cartItems?.reduce((current, next)=>{
     return current + next.price
   }, 0)
-  // green flag
-    //   const cartPrice = cart.totalPriceAfterDiscount
-    // ? cart.totalPriceAfterDiscount
-    // : cart.totalPrice
-    console.log("cartPrice= ",cartPrice);
     
   const totalOrderPrice = cartPrice + (cartPrice * taxes) / 100 + shipping;
   const order = await orderModel.create({
     customer: req.user._id,
-    items: cart.cartItems,
+    items: cart.cartItems.map(item => ({
+      product: item.product._id,
+      quantity: item.quantity,
+      color: item.color,
+      price: item.price,
+      seller: item.product.seller
+    })),
     cartPrice: cartPrice,
     taxes: (cartPrice * taxes) / 100,
     shipping: shipping,
@@ -60,7 +58,7 @@ const createCreditOrder = async (paymentData) => {
   const email = paymentData.order.shipping_data.email;
   const address = paymentData.order.shipping_data;
 
-  const cart = await cartModel.findOne({ paymobOrderId });
+  const cart = await cartModel.findOne({ paymobOrderId }).populate('cartItems.product', 'seller');
   if (!cart) throw new Error("❌ Cart not found for this Paymob order");
 
   const user = await userModel.findOne({ email });
@@ -83,7 +81,13 @@ const createCreditOrder = async (paymentData) => {
   const order = await orderModel.create({
     customer: user._id,
     shippingAddress,
-    items: cart.cartItems,
+    items: cart.cartItems.map(item => ({
+      product: item.product._id,
+      quantity: item.quantity,
+      color: item.color,
+      price: item.price,
+      seller: item.product.seller
+    })),
     cartPrice,
     taxes: (cartPrice * taxes) / 100,
     shipping,
@@ -192,22 +196,12 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
 
     try {
       await createCreditOrder(paymentData);
-      console.log(
-        `✅ Paymob Payment successful for Order ID ${
-          paymentData.order.id
-        } – Amount: ${paymentData.amount_cents / 100} EGP`
-      );
     } catch (err) {
       console.error("❌ Failed to create order from Paymob webhook:", err);
       return res.status(500).send("Server Error");
     }
   } else if (event.type !== "TRANSACTION") {
-    console.log(
-      `ℹ️ Received event type '${event.type}' - Ignored for order creation`
-    );
   } else {
-    console.log("❌ Unsuccessful or irrelevant Paymob transaction");
-    console.log("Received Event:", JSON.stringify(event, null, 2));
   }
 
   res.status(200).send("Received");
@@ -261,12 +255,10 @@ exports.getSellerOrders = asyncHandler(async (req, res, next) => {
   if (!seller) {
     return next(new ApiError("Seller profile not found", 404));
   }
-
-  console.log("seller",seller);
   
-  // Build base match conditions using direct sellerId filter
+  // Build base match conditions using direct sellerId filter on items
   const matchConditions = {
-    "items.product.seller": seller._id,  // Direct filter on sellerId in product
+    "items.seller": seller._id,  // Direct filter on sellerId in order items
   };
 
   // Status filter
@@ -361,16 +353,14 @@ exports.getSellerOrders = asyncHandler(async (req, res, next) => {
     { $limit: limit }
   ]);
 
-  console.log("orders",orders);
-  
   // Filter items to only seller's products and calculate totals
   const filteredOrders = orders.map((order) => {
     const sellerItems = order.items.filter((item) =>
-      item.product?.seller?.toString() === seller._id.toString()
+      item.seller?.toString() === seller._id.toString()
     );
 
     const sellerCartPrice = sellerItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const sellerTaxes = (sellerCartPrice * (order.taxes / order.cartPrice)) || 0;
+    const sellerTaxes = order.cartPrice > 0 ? (sellerCartPrice * (order.taxes / order.cartPrice)) : 0;
     const sellerTotal = sellerCartPrice + sellerTaxes;
 
     return {
@@ -483,7 +473,7 @@ exports.getSellerOrderDetails = asyncHandler(async (req, res, next) => {
 
   // Filter items to only seller's products
   const sellerItems = orderData.items.filter((item) =>
-    item.product?.seller?.toString() === seller._id.toString()
+    item.seller?.toString() === seller._id.toString()
   );
 
   if (sellerItems.length === 0) {
@@ -492,7 +482,7 @@ exports.getSellerOrderDetails = asyncHandler(async (req, res, next) => {
 
   // Calculate seller-specific totals
   const sellerCartPrice = sellerItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const sellerTaxes = (sellerCartPrice * (orderData.taxes / orderData.cartPrice)) || 0;
+  const sellerTaxes = orderData.cartPrice > 0 ? (sellerCartPrice * (orderData.taxes / orderData.cartPrice)) : 0;
   const sellerTotal = sellerCartPrice + sellerTaxes;
 
   const filteredOrder = {

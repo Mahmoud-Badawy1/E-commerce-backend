@@ -52,7 +52,7 @@ router
   );
 router
   .route("/checkout-session/:id")
-  .get(
+  .get( 
     authController.protect,
     authController.allowedTo("customer"),
     orderController.checkOutSession
