@@ -1,0 +1,3267 @@
+{
+  "info": {
+    "_postman_id": "2d4abbe7-dff6-41fb-8ab9-64ca9662ad31",
+    "name": "E-Commerce WebSite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "26554631"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "signUp",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = pm.response.json();\r",
+                  "let token = response.token;\r",
+                  "pm.environment.set(\"JWT\", token)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Stanford\",\r\n    \"email\": \"m2@gmail.com\",\r\n    \"phone\": \"01233412321\",\r\n    \"password\": \"123456\",\r\n    \"passwordConfirmation\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/auth/signUp",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "signUp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "signUp-google",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = pm.response.json();\r",
+                  "let token = response.token;\r",
+                  "pm.environment.set(\"JWT\", token)"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"idToken\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/auth/signUp-google",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "signUp-google"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logIn",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = pm.response.json();\r",
+                  "let token = response.token;\r",
+                  "pm.environment.set(\"JWT\", token)"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"ahmed@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/auth/logIn",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logIn"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify-2FA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = pm.response.json();\r",
+                  "let token = response.token;\r",
+                  "pm.environment.set(\"JWT\", token)"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"\",\r\n    \"OTP\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/auth/verify-2FA",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-2FA"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "resend-2FA-Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = pm.response.json();\r",
+                  "let token = response.token;\r",
+                  "pm.environment.set(\"JWT\", token)"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/auth/resend-2FA",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "resend-2FA"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "adminDashboard",
+      "item": [
+        {
+          "name": "createUser",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"\",\r\n    \"email\": \"\",\r\n    \"phone\": \"\",\r\n    \"password\": \"\",\r\n    \"passwordConfirmation\": \"\",\r\n    \"role\" : \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/admin",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllUsers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/admin",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSpecificUser",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/admin/682cd24209b3cd29954d763e",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "682cd24209b3cd29954d763e"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateUser",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/admin/6787816668730d28fe99332f",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "6787816668730d28fe99332f"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "changePassword",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\":\"\",\r\n    \"currentPassword\":\"\",\r\n    \"newPassword\":\"\",\r\n    \"newPasswordConfirm\":\"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/admin/changePassword",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "changePassword"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteUser",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/admin/682cd24209b3cd29954d763e",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "682cd24209b3cd29954d763e"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "UserDashboard",
+      "item": [
+        {
+          "name": "getMyData",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/users/getMyData",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "getMyData"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateMyData",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/users/updateMyData",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "updateMyData"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "changeMyPassword",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = pm.response.json();\r",
+                  "let token = response.token;\r",
+                  "pm.environment.set(\"JWT\", token)"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"currentPassword\":\"\",\r\n    \"newPassword\":\"\",\r\n    \"newPasswordConfirm\":\"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/users/updateMyPassword",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "updateMyPassword"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deacticveMyUser",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/users/deactivateMyUser",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "deactivateMyUser"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "affiliateDashboard",
+      "item": [
+        {
+          "name": "registerAsAffiliate",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"6817dad5b106eaab680f8437\"\n}"
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/affiliates/register",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAffiliateDashboard",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_JWT_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/affiliates/dashboard",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates",
+                "dashboard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAffiliateCommissions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_JWT_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/affiliates/commissions",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates",
+                "commissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "trackReferralClick",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/affiliates/track-click/DCLPLF6X",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates",
+                "track-click",
+                "DCLPLF6X"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "requestCommissionPayout",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_JWT_TOKEN"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentMethod\": \"paypal\",\n  \"accountEmail\": \"affiliate@example.com\"\n}"
+            },
+            "url": {
+              "raw": "https://e-commerce-web-site-inky.vercel.app/api/v1/affiliates/request-payout",
+              "protocol": "https",
+              "host": [
+                "e-commerce-web-site-inky",
+                "vercel",
+                "app"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates",
+                "request-payout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAffiliateOrders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_JWT_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/affiliates/orders",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "affiliates",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "accountantDashboard",
+      "item": [
+        {
+          "name": "getAllCommissionRequests",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/accountants/commission-requests",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "accountants",
+                "commission-requests"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "reviewCommissionRequest(Approve/Reject)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approved\",\n  \"notes\": \"Approved by accountant\"\n}"
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/accountants/commission-requests/:requestId/review",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "accountants",
+                "commission-requests",
+                ":requestId",
+                "review"
+              ],
+              "variable": [
+                {
+                  "key": "requestId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "markRequestAsPaid",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/accountants/commission-requests/:requestId/pay",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "accountants",
+                "commission-requests",
+                ":requestId",
+                "pay"
+              ],
+              "variable": [
+                {
+                  "key": "requestId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAffiliateCommissionReport",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/accountants/affiliate-commissions",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "accountants",
+                "affiliate-commissions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getPaidOrdersReport",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/accountants/paid-orders",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "accountants",
+                "paid-orders"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "forgetPassword",
+      "item": [
+        {
+          "name": "forgetPassword",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/forgetPassword/sendResetCode",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "forgetPassword",
+                "sendResetCode"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "verifyResetCode",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"resetCode\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/forgetPassword/verifyResetCode",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "forgetPassword",
+                "verifyResetCode"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "resetPassword",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = pm.response.json();\r",
+                  "let token = response.token;\r",
+                  "pm.environment.set(\"JWT\", token)"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\" : \"\",\r\n    \"newPassword\": \"\",\r\n    \"confirmNewPassword\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/forgetPassword/resetPassword",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "forgetPassword",
+                "resetPassword"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "createCategory",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "value": null
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/categories",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllCategories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/categories?page=2&limit=1",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "limit",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSpecificCategory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/6756848f65d99ed96c70caf2",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "6756848f65d99ed96c70caf2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateCategory",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "value": null
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/6782d001ffd73b40a97c233e",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "6782d001ffd73b40a97c233e"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteCategory",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/6782d001ffd73b40a97c233e",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "6782d001ffd73b40a97c233e"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "createProduct",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "quantity",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "sold",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "category",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "subCategory",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "ratingsAverage",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "ratingsQuantity",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "imageCover",
+                  "type": "file",
+                  "value": null
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/products/",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllProducts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/products",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "sold[gte]",
+                  "value": "25",
+                  "disabled": true
+                },
+                {
+                  "key": "quantity[gte]",
+                  "value": "20",
+                  "disabled": true
+                },
+                {
+                  "key": "sort",
+                  "value": "-ratingsAverage",
+                  "disabled": true
+                },
+                {
+                  "key": "fields",
+                  "value": "ratingsAverage",
+                  "disabled": true
+                },
+                {
+                  "key": "keyword",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "2",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "2",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSpecificProduct",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/products/679868cc96698d640e58133c",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "679868cc96698d640e58133c"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateProduct",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "imageCover",
+                  "type": "file",
+                  "src": "/E:/Programing course/Projects/Tests/CS2056_Female_OversizedOrganicT-Shirt-MarineBlue_1.webp",
+                  "disabled": true
+                },
+                {
+                  "key": "subCategories",
+                  "value": "67568a8e76f907ddd61ab7c0",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "subCategories",
+                  "value": "675685b465d99ed96c70cb11",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "price",
+                  "value": "50000",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "discountPercentage",
+                  "value": "",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/products/679868cc96698d640e58133c",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "679868cc96698d640e58133c"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteProduct",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/products/6782d3955f476dc0f8065c28",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "6782d3955f476dc0f8065c28"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Coupons",
+      "item": [
+        {
+          "name": "createCoupon",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"code\": \"eomdnr_9\",\r\n    \"discount\": 80,\r\n    \"expire\": \"08/25/2025\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/coupons",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "coupons"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllCoupons",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/coupons?page=1&limit=4",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "coupons"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "4"
+                },
+                {
+                  "key": "keyword",
+                  "value": "plein",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSpecificCoupon",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/coupons/679349c52230394243537033",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "coupons",
+                "679349c52230394243537033"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateCoupon",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"discount\": 10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/coupons/679349c52230394243537733",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "coupons",
+                "679349c52230394243537733"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteCoupon",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/coupons/67934b25c9e3edaeb190164c",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "coupons",
+                "67934b25c9e3edaeb190164c"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Addresses",
+      "item": [
+        {
+          "name": "createAddress",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"alias\":\"work\",\r\n    \"phone\":\"01223314105\",\r\n    \"details\":\"7 street moharee m bek\",\r\n    \"country\":\"Egypt\",\r\n    \"city\":\"Alx\",\r\n    \"postalCode\":\"448\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/addresses",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "addresses"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllAddresses",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/addresses",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "addresses"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "4",
+                  "disabled": true
+                },
+                {
+                  "key": "keyword",
+                  "value": "plein",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteAddress",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/addresses/678feb3aea961af58ec950aa",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "addresses",
+                "678feb3aea961af58ec950aa"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Wishlists",
+      "item": [
+        {
+          "name": "createWishlist",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"productId\":\"67719a5bbb06e77643564b78\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/wishlists",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "wishlists"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllWishlists",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/wishlists/",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "wishlists",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "4",
+                  "disabled": true
+                },
+                {
+                  "key": "keyword",
+                  "value": "plein",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteWishlist",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/67719a5bbb06e77643564b78",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "67719a5bbb06e77643564b78"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "createReview",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\":\"nice item is very good and well\",\r\n    \"rating\":\"4.8\",\r\n    \"product\":\"67719a5bbb06e77643564b79\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/reviews",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllReviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/reviews",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "4",
+                  "disabled": true
+                },
+                {
+                  "key": "keyword",
+                  "value": "plein",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSpecificReview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/67875841f7e983b60811feb5",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "67875841f7e983b60811feb5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateReview",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"rating\":\"1.8\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/678e97f53952c4bb7c830bb3",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "678e97f53952c4bb7c830bb3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteReview",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/678e97f53952c4bb7c830bb3",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "678e97f53952c4bb7c830bb3"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "product/reviews",
+      "item": [
+        {
+          "name": "getListOfSubReviewsForSpecificProduct",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/products/67719a5bbb06e77643564b7c/reviews?page=1&limit=10",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "67719a5bbb06e77643564b7c",
+                "reviews"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "createReviewForSpecificProduct",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"title\":\"tressst\",\r\n    \"rating\":\"4.5\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/products/67719a5bbb06e77643564b7c/reviews",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "67719a5bbb06e77643564b7c",
+                "reviews"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Carts",
+      "item": [
+        {
+          "name": "getAllProductsInCart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/carts/",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "carts",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "4",
+                  "disabled": true
+                },
+                {
+                  "key": "keyword",
+                  "value": "plein",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "addProductsToCart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"productId\":\"6976c0174f14d493e64bf090\"\r\n    // \"color\":\"white\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/carts",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "carts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateQuantityInCart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"quantity\": 4\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/carts/67aad97ed4570b6f2ae1ca90",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "carts",
+                "67aad97ed4570b6f2ae1ca90"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "applyCouponInCart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"code\": \"EOMDNR_9\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/carts/applyCoupon",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "carts",
+                "applyCoupon"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteProductsInCart",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/carts/6794b6eb7739fad43a182781",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "carts",
+                "6794b6eb7739fad43a182781"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "clearCartContent",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/carts",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "carts"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "createCashOrder",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/orders/6976b25cb6755bc2f0dbd367",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "6976b25cb6755bc2f0dbd367"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "checkOutSession",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/orders/checkout-session/682cd6a8a04dfffd03da9e01",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "checkout-session",
+                "682cd6a8a04dfffd03da9e01"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllOrders",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/orders",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "keyword",
+                  "value": "plein",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateOrderStatus",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"isPaid\":\"true\",\r\n    \"status\":\"delivered\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/orders/67aa43fd255f7e5b368941ed",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "67aa43fd255f7e5b368941ed"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteOrder",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/orders/67aa43e8255f7e5b368941d5",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "67aa43e8255f7e5b368941d5"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "addSetting",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"key\": \"taxes\",\r\n    \"value\": 14\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/settings",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "settings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSettings",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/settings",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "settings"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "2",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateSettings",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"value\": 14\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/settings/67a5a46fc90afb90219c81fe",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "settings",
+                "67a5a46fc90afb90219c81fe"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Seller Entity",
+      "item": [
+        {
+          "name": "profile",
+          "item": [
+            {
+              "name": "getProfile",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/sellers/profile",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "sellers",
+                    "profile"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "2",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "1",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "addProfile",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"firstName\": \"Mo\",\r\n    \"lastName\": \"sad\",\r\n    \"email\": \"m2@gmail.com\",\r\n    \"phone\": \"01232132123\",\r\n    \"country\": \"Stanford\",\r\n    \"gender\":\"male\",\r\n    \"dateOfBirth\":\"2025-12-12T17:29:29.000Z\",\r\n    \"address\": \"sadsad\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/sellers/create-profile",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "sellers",
+                    "create-profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "updateProfile",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"firstName\": \"Eng@Mohamed\",\r\n    \"lastName\": \"sad\",\r\n    \"gender\": \"female\",\r\n    \"dateOfBirth\": \"2026-12-12T17:29:29.000Z\",\r\n    \"profileImage\": \"\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/sellers/profile",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "sellers",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "updateContact",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"phone\": \"01132132132\",\r\n    \"country\": \"country\",\r\n    \"address\": \"asd\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/sellers/contact-details",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "sellers",
+                    "contact-details"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "updatePassword",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"currentPassword\": \"1234567\",\r\n  \"newPassword\": \"123456\",\r\n  \"newPasswordConfirm\": \"123456\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/sellers/password",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "sellers",
+                    "password"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "orders",
+          "item": [
+            {
+              "name": "getSellerOrders",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": ""
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/orders/seller",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders",
+                    "seller"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getSellerOrder",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/orders/seller",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "orders",
+                    "seller"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "products",
+          "item": [
+            {
+              "name": "getAll",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/products/seller",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products",
+                    "seller"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getOne",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/products/seller/6975215d5d29d9c687aa41f2",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products",
+                    "seller",
+                    "6975215d5d29d9c687aa41f2"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "add",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"title\": \"Sample Product 2\",\r\n  \"description\": \"Detailed description of the product\",\r\n  \"quantity\": 50,\r\n  \"price\": 99.99,\r\n  \"category\": \"69388fccc95a6b26e1855075\",  // Valid category ObjectId\r\n  \"colors\": [\"red\", \"blue\"],  // Optional\r\n  \"imageCover\":\"image.jpg\",\r\n  \"images\": [\"image1.jpg\", \"image2.jpg\"]  // Optional\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/products/seller",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products",
+                    "seller"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "update",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"title\": \"Sample Product By seller\"\r\n//   \"description\": \"Detailed description of the product\",\r\n//   \"quantity\": 50,\r\n//   \"price\": 99.99,\r\n//   \"category\": \"64f1b2c3d4e5f6789abc1234\",  // Valid category ObjectId\r\n//   \"colors\": [\"red\", \"blue\"],  // Optional\r\n//   \"images\": [\"image1.jpg\", \"image2.jpg\"]  // Optional\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/products/seller/6975215d5d29d9c687aa41f2",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products",
+                    "seller",
+                    "6975215d5d29d9c687aa41f2"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"title\": \"Sample Product\",\r\n  \"description\": \"Detailed description of the product\",\r\n  \"quantity\": 50,\r\n  \"price\": 99.99,\r\n  \"category\": \"64f1b2c3d4e5f6789abc1234\",  // Valid category ObjectId\r\n  \"colors\": [\"red\", \"blue\"],  // Optional\r\n  \"images\": [\"image1.jpg\", \"image2.jpg\"]  // Optional\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/products/seller/6975215d5d29d9c687aa41f2",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "products",
+                    "seller",
+                    "6975215d5d29d9c687aa41f2"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "deactivateSeller",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/sellers/deactivate",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sellers",
+                "deactivate"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

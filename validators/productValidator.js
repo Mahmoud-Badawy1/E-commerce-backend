@@ -62,6 +62,24 @@ exports.createProductValidator = [
     .optional()
     .isArray()
     .withMessage("Colors should be array of string"),
+  check("sizes")
+    .optional()
+    .isArray()
+    .withMessage("Sizes should be array of string"),
+  check("sku")
+    .notEmpty()
+    .withMessage("Product SKU is required")
+    .matches(/^[A-Z0-9_-]+$/i)
+    .withMessage("SKU can only contain letters, numbers, dashes, and underscores")
+    .custom(async (value) => {
+      const existingProduct = await productModel.findOne({ sku: value.toUpperCase() });
+      if (existingProduct) {
+        return Promise.reject({
+          message: `SKU already exists: ${value}`,
+          statusCode: 400,
+        });
+      }
+    }),
 
   check("category")
     .notEmpty()
@@ -154,6 +172,26 @@ exports.updateProductValidator = [
     .optional()
     .isArray()
     .withMessage("Colors should be array of string"),
+  check("sizes")
+    .optional()
+    .isArray()
+    .withMessage("Sizes should be array of string"),
+  check("sku")
+    .optional()
+    .matches(/^[A-Z0-9_-]+$/i)
+    .withMessage("SKU can only contain letters, numbers, dashes, and underscores")
+    .custom(async (value, { req }) => {
+      const existingProduct = await productModel.findOne({ 
+        sku: value.toUpperCase(),
+        _id: { $ne: req.params.id }
+      });
+      if (existingProduct) {
+        return Promise.reject({
+          message: `SKU already exists: ${value}`,
+          statusCode: 400,
+        });
+      }
+    }),
   check("images")
     .optional()
     .isArray()

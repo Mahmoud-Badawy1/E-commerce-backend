@@ -28,8 +28,8 @@ exports.getAllProductsInCart = asyncHandler(async (req, res, next) => {
 });
 
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
-  const { productId, color } = req.body;
-  console.log("Adding product to cart",productId,color);
+  const { productId, color, size } = req.body;
+  console.log("Adding product to cart",productId,color,size);
   
   const product = await productModel.findById(productId);
   console.log("Found product:",product);
@@ -40,12 +40,12 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
   if (!cart) {
     cart = await cartModel.create({
       user: req.user._id,
-      cartItems: [{ product: productId, color: color, price: product.price }],
+      cartItems: [{ product: productId, color: color, size: size, price: product.price }],
     });
     console.log("Created new cart:",cart);
   } else {
     const productIndex = cart.cartItems.findIndex(
-      (item) => item.product.toString() == productId && item.color == color
+      (item) => item.product.toString() == productId && item.color == color && item.size == size
     );
     if (productIndex >= 0) {
       const cartItem = cart.cartItems[productIndex];
@@ -55,6 +55,7 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
       cart.cartItems.push({
         product: productId,
         color: color,
+        size: size,
         price: product.price,
       });
     }
