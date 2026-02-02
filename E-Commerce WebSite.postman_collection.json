@@ -3262,6 +3262,1085 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Stats and Analytics",
+      "item": [
+        {
+          "name": "Public",
+          "item": [
+            {
+              "name": "getActiveAds",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/public/ads",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "public",
+                    "ads"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getActiveBanners",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/public/banners",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "public",
+                    "banners"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getFeaturedProducts",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/public/featured-products",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "public",
+                    "featured-products"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getBestSellers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/public/best-sellers?limit=10",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "public",
+                    "best-sellers"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Seller",
+          "item": [
+            {
+              "name": "getPopularProducts",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/seller/popular-products?limit=10",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "seller",
+                    "popular-products"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getSalesAnalytics",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/seller/sales-analytics?period=month",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "seller",
+                    "sales-analytics"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "month",
+                      "description": "day, month, or year"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getCustomerGrowth",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/seller/customer-growth",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "seller",
+                    "customer-growth"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getProvinceStats",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/seller/province-stats",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "seller",
+                    "province-stats"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getDashboardStats",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/seller/dashboard",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "seller",
+                    "dashboard"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getSalesTarget",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/seller/sales-target",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "seller",
+                    "sales-target"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "setSalesTarget",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"targetAmount\": 500000,\r\n    \"period\": \"monthly\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/seller/sales-target",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "seller",
+                    "sales-target"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getSellerAd",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/stats/seller/ad",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "stats",
+                    "seller",
+                    "ad"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Admin",
+          "item": [
+            {
+              "name": "Stats",
+              "item": [
+                {
+                  "name": "getPopularProducts",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/popular-products?limit=10",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "popular-products"
+                      ],
+                      "query": [
+                        {
+                          "key": "limit",
+                          "value": "10"
+                        },
+                        {
+                          "key": "sellerId",
+                          "value": "",
+                          "disabled": true
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "getSalesAnalytics",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/sales-analytics?period=month",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "sales-analytics"
+                      ],
+                      "query": [
+                        {
+                          "key": "period",
+                          "value": "month"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "getCustomerGrowth",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/customer-growth",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "customer-growth"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "getProvinceStats",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/province-stats",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "province-stats"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "getDashboardStats",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/dashboard",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "dashboard"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "getAllSalesTargets",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/all-sales-targets",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "all-sales-targets"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "getBestSellers",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/best-sellers?limit=10",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "best-sellers"
+                      ],
+                      "query": [
+                        {
+                          "key": "limit",
+                          "value": "10"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Featured Products",
+              "item": [
+                {
+                  "name": "getFeaturedProducts",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/featured-products",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "featured-products"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "setFeaturedProducts",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"products\": [\r\n        \"product_id_1\",\r\n        \"product_id_2\",\r\n        \"product_id_3\",\r\n        \"product_id_4\",\r\n        \"product_id_5\",\r\n        \"product_id_6\",\r\n        \"product_id_7\",\r\n        \"product_id_8\",\r\n        \"product_id_9\"\r\n    ]\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/featured-products",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "featured-products"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Ads",
+              "item": [
+                {
+                  "name": "getAllAds",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/ads",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "ads"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "createAd-Structured",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"slot\": \"ad1\",\r\n    \"type\": \"structured\",\r\n    \"background\": \"#4CAF50\",\r\n    \"headline\": \"Increase your sales\",\r\n    \"description\": \"Unlock the Proven Strategies to Unleash the Potential of Your Business\",\r\n    \"ctaText\": \"Learn More\",\r\n    \"ctaLink\": \"https://example.com\",\r\n    \"isActive\": true\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/ads",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "ads"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "createAd-HTML",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"slot\": \"sellerAd\",\r\n    \"type\": \"html\",\r\n    \"htmlContent\": \"<div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 8px; color: white;'><h2>Boost Your Sales!</h2><p>Premium tools for sellers</p><a href='#' style='color: white;'>Get Started</a></div>\",\r\n    \"isActive\": true\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/ads",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "ads"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "updateAd",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"headline\": \"Updated Headline\",\r\n    \"isActive\": false\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/ads/{adId}",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "ads",
+                        "{adId}"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "deleteAd",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/ads/{adId}",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "ads",
+                        "{adId}"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Banners",
+              "item": [
+                {
+                  "name": "getAllBanners",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/banners",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "banners"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "createBanner-Structured",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"slot\": \"banner1\",\r\n    \"type\": \"structured\",\r\n    \"image\": \"banner1.jpg\",\r\n    \"headline\": \"Summer Sale\",\r\n    \"description\": \"Up to 50% off on selected items\",\r\n    \"ctaText\": \"Shop Now\",\r\n    \"ctaLink\": \"/sale\",\r\n    \"isActive\": true\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/banners",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "banners"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "createBanner-HTML",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"slot\": \"banner2\",\r\n    \"type\": \"html\",\r\n    \"htmlContent\": \"<div style='background: url(banner.jpg); height: 300px; display: flex; align-items: center; justify-content: center;'><h1 style='color: white;'>Special Offer!</h1></div>\",\r\n    \"isActive\": true\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/banners",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "banners"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "updateBanner",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "PUT",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n    \"headline\": \"Updated Banner\",\r\n    \"isActive\": false\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/banners/{bannerId}",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "banners",
+                        "{bannerId}"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "deleteBanner",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{JWT}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "{{mainHost}}/api/v1/stats/admin/banners/{bannerId}",
+                      "host": [
+                        "{{mainHost}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "stats",
+                        "admin",
+                        "banners",
+                        "{bannerId}"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

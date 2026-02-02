@@ -1119,6 +1119,397 @@ This document provides comprehensive documentation for all Postman requests in t
   1. Send request.
 - **Response**: Deactivated.
 
+## Stats and Analytics
+
+### Public Endpoints (No Auth Required)
+
+#### getActiveAds
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/public/ads`
+- **Auth**: None
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: List of active ads.
+
+#### getActiveBanners
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/public/banners`
+- **Auth**: None
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: List of active banners.
+
+#### getFeaturedProducts
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/public/featured-products`
+- **Auth**: None
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: 9 featured products.
+
+#### getBestSellers
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/public/best-sellers?limit=10`
+- **Auth**: None
+- **Body**: None
+- **Query Params**:
+  - `limit`: Number of products (optional, default 10)
+- **Steps**:
+  1. Send request with optional limit.
+- **Response**: Best-selling products.
+
+### Seller Stats (Seller Role Required)
+
+#### getPopularProducts
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/seller/popular-products?limit=10`
+- **Auth**: Bearer (Seller)
+- **Body**: None
+- **Query Params**:
+  - `limit`: Number of products (optional, default 10)
+- **Steps**:
+  1. Send request.
+- **Response**: Seller's most popular products by sold count.
+
+#### getSalesAnalytics
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/seller/sales-analytics?period=month`
+- **Auth**: Bearer (Seller)
+- **Body**: None
+- **Query Params**:
+  - `period`: "day", "month", or "year" (optional, default "month")
+- **Steps**:
+  1. Provide period filter.
+  2. Send request.
+- **Response**: Average sale value, average items per sale, total revenue, total items.
+
+#### getCustomerGrowth
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/seller/customer-growth`
+- **Auth**: Bearer (Seller)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: Customer growth stats over time.
+
+#### getProvinceStats
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/seller/province-stats`
+- **Auth**: Bearer (Seller)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: Geographic distribution of customers by province (city field).
+
+#### getDashboardStats
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/seller/dashboard`
+- **Auth**: Bearer (Seller)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: Total revenue, customers, transactions, products.
+
+#### getSalesTarget
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/seller/sales-target`
+- **Auth**: Bearer (Seller)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: Active sales target with current progress.
+
+#### setSalesTarget
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/stats/seller/sales-target`
+- **Auth**: Bearer (Seller)
+- **Body** (JSON):
+  ```json
+  {
+    "targetAmount": 500000,
+    "period": "monthly" // or "yearly"
+  }
+  ```
+- **Steps**:
+  1. Provide target amount and period.
+  2. Send request.
+- **Response**: Created sales target (deactivates previous targets).
+
+#### getSellerAd
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/seller/ad`
+- **Auth**: Bearer (Seller)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: Seller dashboard ad (sellerAd slot).
+
+### Admin Stats (Admin Role Required)
+
+#### getPopularProducts
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/admin/popular-products?limit=10&sellerId=xxx`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Query Params**:
+  - `limit`: Number of products (optional, default 10)
+  - `sellerId`: Filter by specific seller (optional)
+- **Steps**:
+  1. Send request with optional filters.
+- **Response**: Popular products across all sellers or by specific seller.
+
+#### getSalesAnalytics
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/admin/sales-analytics?period=month`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Query Params**:
+  - `period`: "day", "month", or "year" (optional, default "month")
+- **Steps**:
+  1. Provide period filter.
+  2. Send request.
+- **Response**: App-wide sales analytics.
+
+#### getCustomerGrowth
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/admin/customer-growth`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: App-wide customer growth.
+
+#### getProvinceStats
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/admin/province-stats`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: App-wide province distribution.
+
+#### getDashboardStats
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/admin/dashboard`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: App-wide total revenue, customers, transactions, products.
+
+#### getAllSalesTargets
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/admin/all-sales-targets`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: All sellers' sales targets with progress.
+
+#### getBestSellers
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/admin/best-sellers?limit=10`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Query Params**:
+  - `limit`: Number of products (optional, default 10)
+- **Steps**:
+  1. Send request.
+- **Response**: Best-selling products.
+
+### Admin Featured Products
+
+#### getFeaturedProducts
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/admin/featured-products`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: Current featured products.
+
+#### setFeaturedProducts
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/stats/admin/featured-products`
+- **Auth**: Bearer (Admin)
+- **Body** (JSON):
+  ```json
+  {
+    "products": [
+      "product_id_1",
+      "product_id_2",
+      "product_id_3",
+      "product_id_4",
+      "product_id_5",
+      "product_id_6",
+      "product_id_7",
+      "product_id_8",
+      "product_id_9"
+    ]
+  }
+  ```
+- **Steps**:
+  1. Provide exactly 9 product IDs.
+  2. Send request.
+- **Response**: Updated featured products.
+
+### Admin Ads Management
+
+#### getAllAds
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/admin/ads`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: All ads.
+
+#### createAd (Structured)
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/stats/admin/ads`
+- **Auth**: Bearer (Admin)
+- **Body** (JSON):
+  ```json
+  {
+    "slot": "ad1", // ad1-ad5, sellerAd
+    "type": "structured",
+    "background": "#4CAF50",
+    "headline": "Increase your sales",
+    "description": "Unlock the Proven Strategies",
+    "ctaText": "Learn More",
+    "ctaLink": "https://example.com",
+    "isActive": true
+  }
+  ```
+- **Steps**:
+  1. Provide structured ad details.
+  2. Send request.
+- **Response**: Created ad.
+
+#### createAd (HTML)
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/stats/admin/ads`
+- **Auth**: Bearer (Admin)
+- **Body** (JSON):
+  ```json
+  {
+    "slot": "sellerAd",
+    "type": "html",
+    "htmlContent": "<div style='...'>Custom HTML</div>",
+    "isActive": true
+  }
+  ```
+- **Steps**:
+  1. Provide HTML ad content.
+  2. Send request.
+- **Response**: Created ad.
+
+#### updateAd
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/stats/admin/ads/{adId}`
+- **Auth**: Bearer (Admin)
+- **Body** (JSON):
+  ```json
+  {
+    "headline": "Updated Headline",
+    "isActive": false
+  }
+  ```
+- **Steps**:
+  1. Provide ad ID and updates.
+  2. Send request.
+- **Response**: Updated ad.
+
+#### deleteAd
+- **Method**: DELETE
+- **URL**: `{{mainHost}}/api/v1/stats/admin/ads/{adId}`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Steps**:
+  1. Provide ad ID.
+  2. Send request.
+- **Response**: Success.
+
+### Admin Banners Management
+
+#### getAllBanners
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/stats/admin/banners`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Steps**:
+  1. Send request.
+- **Response**: All banners.
+
+#### createBanner (Structured)
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/stats/admin/banners`
+- **Auth**: Bearer (Admin)
+- **Body** (JSON):
+  ```json
+  {
+    "slot": "banner1", // banner1-banner3
+    "type": "structured",
+    "image": "banner1.jpg",
+    "headline": "Summer Sale",
+    "description": "Up to 50% off",
+    "ctaText": "Shop Now",
+    "ctaLink": "/sale",
+    "isActive": true
+  }
+  ```
+- **Steps**:
+  1. Provide structured banner details.
+  2. Send request.
+- **Response**: Created banner.
+
+#### createBanner (HTML)
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/stats/admin/banners`
+- **Auth**: Bearer (Admin)
+- **Body** (JSON):
+  ```json
+  {
+    "slot": "banner2",
+    "type": "html",
+    "htmlContent": "<div style='...'>Custom HTML</div>",
+    "isActive": true
+  }
+  ```
+- **Steps**:
+  1. Provide HTML banner content.
+  2. Send request.
+- **Response**: Created banner.
+
+#### updateBanner
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/stats/admin/banners/{bannerId}`
+- **Auth**: Bearer (Admin)
+- **Body** (JSON):
+  ```json
+  {
+    "headline": "Updated Banner",
+    "isActive": false
+  }
+  ```
+- **Steps**:
+  1. Provide banner ID and updates.
+  2. Send request.
+- **Response**: Updated banner.
+
+#### deleteBanner
+- **Method**: DELETE
+- **URL**: `{{mainHost}}/api/v1/stats/admin/banners/{bannerId}`
+- **Auth**: Bearer (Admin)
+- **Body**: None
+- **Steps**:
+  1. Provide banner ID.
+  2. Send request.
+- **Response**: Success.
+
 ## Notes
 - **Ordering Process**: Authenticate > Add to cart > Get cart ID > Create order.
 - **Seller Operations**: Sellers can manage their products and view orders.
@@ -1126,3 +1517,4 @@ This document provides comprehensive documentation for all Postman requests in t
 - **Affiliate/Seller Checks**: Use getAllOrders or seller-specific endpoints.
 - **Data Requirements**: IDs are MongoDB ObjectIds. Obtain from GET requests. Fields marked as (optional) are not required. Slug fields are auto-generated from name/title using slugify. Check model files for exact schema.
 - **Errors**: Check response for validation errors or permissions.
+- **Stats System**: Province stats use the `city` field from user addresses. Sales targets automatically deactivate previous targets when setting new ones. Featured products require exactly 9 product IDs. Ads have 6 slots (ad1-ad5, sellerAd). Banners have 3 slots (banner1-banner3).
