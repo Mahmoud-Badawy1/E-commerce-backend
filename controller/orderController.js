@@ -48,6 +48,17 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
       },
     }));
     await productModel.bulkWrite(bulkOption, {});
+    
+    // Reserve stock for order items
+    for (const item of cart.cartItems) {
+      const product = await productModel.findById(item.product);
+      if (product) {
+        product.reservedStock += item.quantity;
+        product.addStockHistory("reserved", item.quantity, order._id, "Stock reserved for cash order", req.user._id);
+        await product.save();
+      }
+    }
+    
     await cartModel.findByIdAndDelete(req.params.id);
   }
   res.status(201).json({ message: "Order complete", data: order });
@@ -208,10 +219,13 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateOrderStatus = asyncHandler(async (req, res, next) => {
-  const order = await orderModel.findById(req.params.id);
+  const order = await orderModel.findById(req.params.id).populate('items.product');
   if (!order) {
     return next(new ApiError("No order found with this ID", 404));
   }
+  
+  const oldStatus = order.status;
+  
   if (req.body.isPaid) {
     order.isPaid = true;
     order.paidAt = Date.now();
@@ -220,7 +234,33 @@ exports.updateOrderStatus = asyncHandler(async (req, res, next) => {
     order.status = "delivered";
     order.deliveredAt = Date.now();
   }
-  order.status = req.body.status;
+  
+  // Handle status changes and stock management
+  if (req.body.status === "cancelled" && oldStatus !== "cancelled") {
+    // Release reserved stock when order is cancelled
+    for (const item of order.items) {
+      const product = await productModel.findById(item.product._id);
+      if (product && product.reservedStock > 0) {
+        product.reservedStock = Math.max(0, product.reservedStock - item.quantity);
+        product.addStockHistory("released", item.quantity, order._id, "Stock released due to order cancellation", req.user._id);
+        await product.save();
+      }
+    }
+  }
+  
+  if (req.body.status === "delivered" && oldStatus !== "delivered") {
+    // Consume reserved stock when order is delivered
+    for (const item of order.items) {
+      const product = await productModel.findById(item.product._id);
+      if (product && product.reservedStock >= item.quantity) {
+        product.reservedStock -= item.quantity;
+        product.addStockHistory("sale", item.quantity, order._id, "Stock consumed on order delivery", req.user._id);
+        await product.save();
+      }
+    }
+  }
+  
+  order.status = req.body.status || order.status;
   await order.save();
   res.json({ message: "Order updated successfully", data: order });
 });

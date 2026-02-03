@@ -1,0 +1,18 @@
+Server running on port: 8000
+Data Base Connected: ac-8f3wzy5-shard-00-02.3ehsw5t.mongodb.net
+{
+  _id: new ObjectId('6976b5bdb6e2c4780d5b3aca'),
+  name: 'Stanford',
+  email: 'm@gmail.com',
+  password: '$2b$08$vI06bzhuqr.A3LkRomA7Me2NQFMQdAHk9EiT22fgogRJHPgrEkUOW',
+  phone: '01233412321',
+  role: 'seller',
+  active: false,
+  wishlist: [],
+  addresses: [],
+  createdAt: 2026-01-26T00:30:53.324Z,
+  updatedAt: 2026-01-26T00:30:53.428Z,
+  __v: 0,
+  twoFactorCode: 501580,
+  twoFactorExpires: 2026-01-26T00:35:53.428Z
+}

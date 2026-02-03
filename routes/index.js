@@ -14,6 +14,7 @@ const affiliateRoutes = require("./affiliateRoute");
 const accountantRoutes = require("./accountantRoute");
 const settingRoute = require("./settingRoute");
 const sellerRoute = require("./sellerRoute");
+const inventoryRoute = require("./inventoryRoute");
 
 const mountRoutes = (app) => {
   app.use("/api/v1/users", userRoute);
@@ -32,6 +33,7 @@ const mountRoutes = (app) => {
   app.use("/api/v1/accountants", accountantRoutes);
   app.use("/api/v1/settings", settingRoute);
   app.use("/api/v1/sellers", sellerRoute);
+  app.use("/api/v1/inventory", inventoryRoute);
 };
 
 module.exports = mountRoutes;

@@ -30,6 +30,10 @@ router
   );
 
 router
+  .route("/seller/bulk-import")
+  .post(productController.bulkImportProducts);
+
+router
   .route("/seller/:id")
   .get(productController.getSellerProduct)
   .put(

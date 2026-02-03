@@ -1,0 +1,5 @@
+Unhandled Rejection: ValidationError: Product validation failed: quantity: Quantity must be at least 1
+    at Document.invalidate (C:\Users\compu magic\Downloads\dont touch\projects 2025\codie\ecommerce\server\E-Commerce\node_modules\.pnpm\mongoose@8.20.3\node_modules\mongoose\lib\document.js:3371:32)
+    at C:\Users\compu magic\Downloads\dont touch\projects 2025\codie\ecommerce\server\E-Commerce\node_modules\.pnpm\mongoose@8.20.3\node_modules\mongoose\lib\document.js:3132:17
+    at C:\Users\compu magic\Downloads\dont touch\projects 2025\codie\ecommerce\server\E-Commerce\node_modules\.pnpm\mongoose@8.20.3\node_modules\mongoose\lib\schemaType.js:1446:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)

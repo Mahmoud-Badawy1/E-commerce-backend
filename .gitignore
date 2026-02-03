@@ -2,4 +2,5 @@ node_modules/
 
 config.env
 docs
-ORDERS_API_PLAN.md
+*.md
+*.txt
