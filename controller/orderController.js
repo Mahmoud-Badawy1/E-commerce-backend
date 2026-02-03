@@ -31,6 +31,7 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
       product: item.product._id,
       quantity: item.quantity,
       color: item.color,
+      size: item.size,
       price: item.price,
       seller: item.product.seller
     })),
@@ -96,6 +97,7 @@ const createCreditOrder = async (paymentData) => {
       product: item.product._id,
       quantity: item.quantity,
       color: item.color,
+      size: item.size,
       price: item.price,
       seller: item.product.seller
     })),
