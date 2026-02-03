@@ -18,6 +18,10 @@ const productSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
     },
+    sku: {
+      type: String,
+      sparse: true,
+    },
     description: {
       type: String,
       required: [true, "product description is required"],
@@ -90,6 +94,99 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    status: {
+      type: String,
+      enum: ["draft", "published"],
+      default: "published",
+    },
+    variants: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        value: {
+          type: String,
+          required: true,
+        },
+        price: {
+          type: Number,
+        },
+        quantity: {
+          type: Number,
+          default: 0,
+        },
+        reservedStock: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
+    // Inventory Management
+    reservedStock: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    lowStockThreshold: {
+      type: Number,
+      default: 10,
+      min: 0,
+    },
+    isLowStock: {
+      type: Boolean,
+      default: false,
+    },
+    // Price History
+    priceHistory: [
+      {
+        price: {
+          type: Number,
+          required: true,
+        },
+        discountPercentage: {
+          type: Number,
+          default: 0,
+        },
+        priceAfterDiscount: {
+          type: Number,
+        },
+        changedBy: {
+          type: mongoose.Schema.ObjectId,
+          ref: "User",
+        },
+        changedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        reason: String,
+      },
+    ],
+    // Stock History
+    stockHistory: [
+      {
+        type: {
+          type: String,
+          enum: ["purchase", "sale", "return", "adjustment", "reserved", "released"],
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+        orderId: mongoose.Schema.ObjectId,
+        reference: String,
+        notes: String,
+        changedBy: {
+          type: mongoose.Schema.ObjectId,
+          ref: "User",
+        },
+        changedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -104,8 +201,69 @@ productSchema.pre("save", function (next) {
       this.price * (1 - this.discountPercentage / 100));
     this.priceAfterDiscount = Math.ceil(discounted);
   }
+  // Check if stock is low
+  const availableStock = this.quantity - this.reservedStock;
+  this.isLowStock = availableStock <= this.lowStockThreshold;
   next();
 });
+
+// Virtual for available stock
+productSchema.virtual("availableStock").get(function () {
+  return Math.max(0, this.quantity - this.reservedStock);
+});
+
+// Method to add price history entry
+productSchema.methods.addPriceHistory = function (price, discountPercentage, changedBy, reason) {
+  const priceAfterDiscount = price * (1 - discountPercentage / 100);
+  this.priceHistory.push({
+    price,
+    discountPercentage,
+    priceAfterDiscount: Math.ceil(priceAfterDiscount),
+    changedBy,
+    reason,
+  });
+  return this;
+};
+
+// Method to add stock history entry
+productSchema.methods.addStockHistory = function (type, quantity, orderId, notes, changedBy) {
+  this.stockHistory.push({
+    type,
+    quantity,
+    orderId,
+    notes,
+    changedBy,
+  });
+  return this;
+};
+
+// Method to reserve stock
+productSchema.methods.reserveStock = function (quantity) {
+  if (this.availableStock < quantity) {
+    throw new Error(`Insufficient stock. Available: ${this.availableStock}`);
+  }
+  this.reservedStock += quantity;
+  this.addStockHistory("reserved", quantity, null, "Stock reserved for order");
+  return this;
+};
+
+// Method to release reserved stock
+productSchema.methods.releaseStock = function (quantity) {
+  this.reservedStock = Math.max(0, this.reservedStock - quantity);
+  this.addStockHistory("released", quantity, null, "Reserved stock released");
+  return this;
+};
+
+// Method to consume stock (reduce quantity and reserved)
+productSchema.methods.consumeStock = function (quantity, orderId) {
+  if (this.reservedStock < quantity) {
+    throw new Error(`Insufficient reserved stock`);
+  }
+  this.quantity -= quantity;
+  this.reservedStock -= quantity;
+  this.addStockHistory("sale", quantity, orderId, "Stock consumed for order fulfillment");
+  return this;
+};
 
 productSchema.virtual("reviews", {
   ref: "Review",

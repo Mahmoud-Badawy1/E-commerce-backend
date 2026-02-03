@@ -229,3 +229,36 @@ exports.deleteProductValidator = [
   check("id").isMongoId().withMessage("Invalid ID formate"),
   validatorMiddleware,
 ];
+
+exports.bulkImportValidator = [
+  check("products")
+    .isArray({ min: 1 })
+    .withMessage("Products must be a non-empty array"),
+  check("products.*.title")
+    .notEmpty()
+    .withMessage("Product title is required"),
+  check("products.*.description")
+    .notEmpty()
+    .withMessage("Product description is required"),
+  check("products.*.price")
+    .isFloat({ min: 0 })
+    .withMessage("Product price must be a valid number"),
+  check("products.*.quantity")
+    .isInt({ min: 0 })
+    .withMessage("Product quantity must be a valid integer"),
+  check("products.*.category")
+    .notEmpty()
+    .withMessage("Product category is required"),
+  check("products.*.imageCover")
+    .notEmpty()
+    .withMessage("Product imageCover is required"),
+  check("products.*.status")
+    .optional()
+    .isIn(["draft", "published"])
+    .withMessage("Status must be 'draft' or 'published'"),
+  check("products.*.sku")
+    .optional()
+    .isString()
+    .withMessage("SKU must be a string"),
+  validatorMiddleware,
+];
