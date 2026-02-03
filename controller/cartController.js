@@ -18,7 +18,14 @@ const calculateCartPrice = (cart) => {
 exports.getAllProductsInCart = asyncHandler(async (req, res, next) => {
   const cart = await cartModel.findOne({ user: req.user._id });
   if (!cart) {
-    return next(new ApiError("No cart found for this user", 404));
+    return res.status(200).json({
+      status: "success",
+      results: 0,
+      data: {
+        cartItems: [],
+        totalPrice: 0,
+      },
+    });
   }
   res.status(200).json({
     status: "success",
