@@ -4341,6 +4341,372 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Customer Management",
+      "item": [
+        {
+          "name": "createCustomer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"firstName\": \"John\",\r\n    \"lastName\": \"Doe\",\r\n    \"email\": \"customer@example.com\",\r\n    \"phone\": \"01234567890\",\r\n    \"streetAddress\": \"123 Main St\",\r\n    \"country\": \"Egypt\",\r\n    \"state\": \"Cairo\",\r\n    \"notes\": \"VIP customer\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/customers",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getAllCustomers",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/customers?page=1&limit=10",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "sellerId",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSpecificCustomer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/customers/{customerId}",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers",
+                "{customerId}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getCustomerDetails",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/customers/{customerId}/details",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers",
+                "{customerId}",
+                "details"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getCustomerTransactionHistory",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/customers/{customerId}/transactions?page=1&limit=10",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers",
+                "{customerId}",
+                "transactions"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateCustomer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"firstName\": \"Jane\",\r\n    \"lastName\": \"Smith\",\r\n    \"phone\": \"09876543210\",\r\n    \"streetAddress\": \"456 New St\",\r\n    \"country\": \"USA\",\r\n    \"state\": \"NY\",\r\n    \"notes\": \"Updated notes\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/customers/{customerId}",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers",
+                "{customerId}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "deleteCustomer",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/customers/{customerId}",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "customers",
+                "{customerId}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Abandoned Carts",
+          "item": [
+            {
+              "name": "recordAbandonedCart",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"cartItems\": [\r\n        {\r\n            \"product\": \"product_id\",\r\n            \"quantity\": 2,\r\n            \"price\": 100\r\n        }\r\n    ],\r\n    \"totalPrice\": 200\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/customers/{customerId}/abandoned-cart",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "customers",
+                    "{customerId}",
+                    "abandoned-cart"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "getAbandonedCarts",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/customers/{customerId}/abandoned-carts",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "customers",
+                    "{customerId}",
+                    "abandoned-carts"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "recoverAbandonedCart",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/customers/abandoned-cart/{cartId}/recover",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "customers",
+                    "abandoned-cart",
+                    "{cartId}",
+                    "recover"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -1510,6 +1510,150 @@ This document provides comprehensive documentation for all Postman requests in t
   2. Send request.
 - **Response**: Success.
 
+## Customer Management
+
+### createCustomer
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/customers`
+- **Auth**: Bearer (Seller/Admin)
+- **Body** (JSON):
+  ```json
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "customer@example.com",
+    "phone": "01234567890",
+    "streetAddress": "123 Main St",
+    "country": "Egypt",
+    "state": "Cairo",
+    "notes": "VIP customer",
+    "sellerId": "seller_id" // optional, admin only
+  }
+  ```
+- **Steps**:
+  1. Provide customer details.
+  2. If email exists, links existing user to seller.
+  3. If email doesn't exist, creates new user + links.
+  4. Send request.
+- **Response**: Created customer relationship.
+
+### getAllCustomers
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/customers?page=1&limit=10`
+- **Auth**: Bearer (Seller/Admin)
+- **Query Params**:
+  - `page`: Page number (optional)
+  - `limit`: Items per page (optional)
+  - `sellerId`: Filter by seller (admin only, optional)
+- **Steps**:
+  1. Send request.
+- **Response**: Seller's customers (or all for admin).
+
+### getSpecificCustomer
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/customers/{customerId}`
+- **Auth**: Bearer (Seller/Admin)
+- **Body**: None
+- **Steps**:
+  1. Provide customer ID.
+  2. Send request.
+- **Response**: Customer details.
+
+### getCustomerDetails
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/customers/{customerId}/details`
+- **Auth**: Bearer (Seller/Admin)
+- **Body**: None
+- **Steps**:
+  1. Provide customer ID.
+  2. Send request.
+- **Response**: Customer with calculated stats (totalOrders, pendingCount, completedCount, abandonedCartCount, etc.).
+
+### getCustomerTransactionHistory
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/customers/{customerId}/transactions?page=1&limit=10`
+- **Auth**: Bearer (Seller/Admin)
+- **Body**: None
+- **Steps**:
+  1. Provide customer ID.
+  2. Send request.
+- **Response**: Orders for this customer from this seller.
+
+### updateCustomer
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/customers/{customerId}`
+- **Auth**: Bearer (Admin only)
+- **Body** (JSON):
+  ```json
+  {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "phone": "09876543210",
+    "streetAddress": "456 New St",
+    "country": "USA",
+    "state": "NY",
+    "notes": "Updated notes"
+  }
+  ```
+- **Steps**:
+  1. Provide customer ID and updates.
+  2. Send request.
+- **Response**: Updated customer.
+
+### deleteCustomer
+- **Method**: DELETE
+- **URL**: `{{mainHost}}/api/v1/customers/{customerId}`
+- **Auth**: Bearer (Admin only)
+- **Body**: None
+- **Steps**:
+  1. Provide customer ID.
+  2. Send request.
+- **Response**: Success (removes link, not the user account).
+
+### Abandoned Carts
+
+#### recordAbandonedCart
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/customers/{customerId}/abandoned-cart`
+- **Auth**: Bearer (Seller/Admin)
+- **Body** (JSON):
+  ```json
+  {
+    "cartItems": [
+      {
+        "product": "product_id",
+        "quantity": 2,
+        "price": 100
+      }
+    ],
+    "totalPrice": 200
+  }
+  ```
+- **Steps**:
+  1. Provide cart items and total.
+  2. Send request.
+- **Response**: Recorded abandoned cart.
+
+#### getAbandonedCarts
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/customers/{customerId}/abandoned-carts`
+- **Auth**: Bearer (Seller/Admin)
+- **Body**: None
+- **Steps**:
+  1. Provide customer ID.
+  2. Send request.
+- **Response**: List of unrecovered abandoned carts.
+
+#### recoverAbandonedCart
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/customers/abandoned-cart/{cartId}/recover`
+- **Auth**: Bearer (Seller/Admin)
+- **Body**: None
+- **Steps**:
+  1. Provide abandoned cart ID.
+  2. Send request.
+- **Response**: Marked as recovered.
+
 ## Notes
 - **Ordering Process**: Authenticate > Add to cart > Get cart ID > Create order.
 - **Seller Operations**: Sellers can manage their products and view orders.

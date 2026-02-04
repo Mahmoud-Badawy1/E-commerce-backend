@@ -16,6 +16,7 @@ const settingRoute = require("./settingRoute");
 const sellerRoute = require("./sellerRoute");
 const inventoryRoute = require("./inventoryRoute");
 const statsRoute = require("./statsRoute");
+const customerRoute = require("./customerRoute");
 
 const mountRoutes = (app) => {
   app.use("/api/v1/users", userRoute);
@@ -36,6 +37,7 @@ const mountRoutes = (app) => {
   app.use("/api/v1/sellers", sellerRoute);
   app.use("/api/v1/inventory", inventoryRoute);
   app.use("/api/v1/stats", statsRoute);
+  app.use("/api/v1/customers", customerRoute);
 };
 
 module.exports = mountRoutes;
