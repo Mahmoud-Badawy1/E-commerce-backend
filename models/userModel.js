@@ -49,6 +49,16 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
     },
+    dob: {
+      type: Date,
+      validate: {
+        validator: function(value) {
+          // DOB should be in the past
+          return !value || value < new Date();
+        },
+        message: 'Date of birth must be in the past'
+      }
+    },
     profileImage: {
       type: String,
     },
