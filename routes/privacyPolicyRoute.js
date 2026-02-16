@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Public route to get active privacy policy
 router.route("/").get(privacyPolicyController.getPrivacyPolicy);
+router.route("/current").get(privacyPolicyController.getPrivacyPolicy);
 
 // Admin only routes
 router.use(authController.protect, authController.allowedTo("admin"));
