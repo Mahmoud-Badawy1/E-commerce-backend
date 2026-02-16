@@ -17,6 +17,12 @@ const sellerRoute = require("./sellerRoute");
 const inventoryRoute = require("./inventoryRoute");
 const statsRoute = require("./statsRoute");
 const customerRoute = require("./customerRoute");
+const deliveryRoute = require("./deliveryRoute");
+const paymentMethodRoute = require("./paymentMethodRoute");
+const socialLinksRoute = require("./socialLinksRoute");
+const privacyPolicyRoute = require("./privacyPolicyRoute");
+const notificationRoute = require("./notificationRoute");
+const sellerApplicationRoute = require("./sellerApplicationRoute");
 
 const mountRoutes = (app) => {
   app.use("/api/v1/users", userRoute);
@@ -38,6 +44,12 @@ const mountRoutes = (app) => {
   app.use("/api/v1/inventory", inventoryRoute);
   app.use("/api/v1/stats", statsRoute);
   app.use("/api/v1/customers", customerRoute);
+  app.use("/api/v1/delivery", deliveryRoute);
+  app.use("/api/v1/payment-methods", paymentMethodRoute);
+  app.use("/api/v1/social-links", socialLinksRoute);
+  app.use("/api/v1/privacy-policy", privacyPolicyRoute);
+  app.use("/api/v1/notifications", notificationRoute);
+  app.use("/api/v1/seller-applications", sellerApplicationRoute);
 };
 
 module.exports = mountRoutes;

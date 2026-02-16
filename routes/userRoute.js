@@ -1,5 +1,6 @@
 const express = require("express");
 const userController = require("../controller/userController");
+const uploadImageMiddleware = require("../middleWares/uploadImageMiddleware");
 
 const router = express.Router();
 const userValidator = require("../validators/userValidator");
@@ -17,6 +18,20 @@ router.put(
   authController.protect,
   userController.updateMyData,
   userValidator.updateUserValidator
+);
+
+// Avatar upload routes
+router.post(
+  "/avatar/upload",
+  authController.protect,
+  uploadImageMiddleware.uploadSingleImage("avatar"),
+  userController.uploadAvatar
+);
+
+router.delete(
+  "/avatar/remove",
+  authController.protect,
+  userController.removeAvatar
 );
 
 router.put(

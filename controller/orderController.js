@@ -6,8 +6,105 @@ const cartModel = require("../models/cartModel");
 const userModel = require("../models/userModel");
 const productModel = require("../models/productModel");
 const sellerModel = require("../models/sellerModel");
+const deliveryModel = require("../models/deliveryModel");
 const ApiFeatures = require("../utils/apiFeatures");
 const settingController = require("./settingController");
+
+// Admin: Assign delivery guy to order
+exports.assignDeliveryGuy = asyncHandler(async (req, res, next) => {
+  const { orderId, deliveryGuyId } = req.body;
+
+  // Verify delivery guy exists and has delivery role
+  const deliveryGuy = await userModel.findOne({ 
+    _id: deliveryGuyId, 
+    role: "delivery" 
+  });
+  if (!deliveryGuy) {
+    return next(new ApiError("Delivery guy not found or invalid role", 404));
+  }
+
+  // Check if delivery guy profile exists
+  const deliveryProfile = await deliveryModel.findOne({ userId: deliveryGuyId });
+  if (!deliveryProfile) {
+    return next(new ApiError("Delivery profile not found", 404));
+  }
+
+  // Update order
+  const order = await orderModel.findByIdAndUpdate(
+    orderId,
+    {
+      deliveryGuy: deliveryGuyId,
+      deliveryStatus: "assigned",
+      assignedAt: new Date(),
+      status: "shipping",
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!order) {
+    return next(new ApiError("Order not found", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Delivery guy assigned successfully",
+    data: order,
+  });
+});
+
+// Admin: Get all delivery guys
+exports.getDeliveryGuys = asyncHandler(async (req, res, next) => {
+  const filter = { role: "delivery", active: true };
+  const users = await userModel.find(filter).select("name email phone avatar city");
+
+  // Get their delivery profiles
+  const userIds = users.map(user => user._id);
+  const deliveryProfiles = await deliveryModel.find({ 
+    userId: { $in: userIds } 
+  }).sort({ totalDeliveries: -1 });
+
+  // Combine user data with delivery data
+  const deliveryGuys = users.map(user => {
+    const profile = deliveryProfiles.find(p => p.userId._id.toString() === user._id.toString());
+    return {
+      ...user.toObject(),
+      deliveryProfile: profile,
+    };
+  });
+
+  res.status(200).json({
+    status: "success",
+    results: deliveryGuys.length,
+    data: deliveryGuys,
+  });
+});
+
+// Admin: Unassign delivery guy from order
+exports.unassignDeliveryGuy = asyncHandler(async (req, res, next) => {
+  const { orderId } = req.params;
+
+  const order = await orderModel.findByIdAndUpdate(
+    orderId,
+    {
+      deliveryGuy: null,
+      deliveryStatus: "unassigned",
+      assignedAt: null,
+      status: "Approved",
+    },
+    { new: true, runValidators: true }
+  );
+
+  if (!order) {
+    return next(new ApiError("Order not found", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: "Delivery guy unassigned successfully",
+    data: order,
+  });
+});
+
 const mongoose = require("mongoose");
 const controllerHandler = require("./controllerHandler");
 
@@ -602,4 +699,36 @@ exports.deleteSellerOrder = asyncHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ status: "success", message: "Order deleted successfully" });
+});
+
+// Customer: Get delivery guy details for my order (only when order is in shipping/delivered)
+exports.getMyOrderDeliveryDetails = asyncHandler(async (req, res, next) => {
+  const order = await orderModel
+    .findOne({ 
+      _id: req.params.orderId, 
+      customer: req.user._id, 
+      status: { $in: ["shipping", "delivered"] },
+      deliveryGuy: { $ne: null }
+    })
+    .populate({
+      path: "deliveryGuy",
+      select: "name phone avatar",
+    });
+
+  if (!order) {
+    return next(new ApiError("Order not found or no delivery assigned yet", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      orderId: order._id,
+      deliveryStatus: order.deliveryStatus,
+      deliveryGuy: order.deliveryGuy,
+      assignedAt: order.assignedAt,
+      pickedUpAt: order.pickedUpAt,
+      deliveredAt: order.deliveredAt,
+      deliveryNotes: order.deliveryNotes,
+    },
+  });
 });

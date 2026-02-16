@@ -2,6 +2,7 @@ const express = require("express");
 const sellerController = require("../controller/sellerController");
 const authController = require("../controller/authController");
 const sellerValidator = require("../validators/sellerValidator");
+const uploadImageMiddleware = require("../middleWares/uploadImageMiddleware");
 
 const router = express.Router();
 
@@ -27,6 +28,18 @@ router.put(
   sellerController.updateSellerProfile
 );
 
+// Profile image upload routes
+router.post(
+  "/profile-image/upload",
+  uploadImageMiddleware.uploadSingleImage("profileImage"),
+  sellerController.uploadProfileImage
+);
+
+router.delete(
+  "/profile-image/remove",
+  sellerController.removeProfileImage
+);
+
 // Contact details routes
 router.put(
   "/contact-details",
@@ -45,6 +58,18 @@ router.put(
 router.delete(
   "/deactivate",
   sellerController.deactivateSellerAccount
+);
+
+// Profile image upload routes
+router.post(
+  "/profile-image/upload",
+  uploadImageMiddleware.uploadSingleImage("profileImage"),
+  sellerController.uploadProfileImage
+);
+
+router.delete(
+  "/profile-image/remove",
+  sellerController.removeProfileImage
 );
 
 module.exports = router;

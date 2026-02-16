@@ -63,8 +63,27 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "Approved", "shipping", "completed", "delivered", "cancelled", "returned", "damaged"],
       default: "pending",
     },
+    deliveryGuy: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+    },
+    deliveryStatus: {
+      type: String,
+      enum: ["unassigned", "assigned", "picked_up", "in_transit", "delivered"],
+      default: "unassigned",
+    },
+    assignedAt: {
+      type: Date,
+    },
+    pickedUpAt: {
+      type: Date,
+    },
     deliveredAt: {
       type: Date,
+    },
+    deliveryNotes: {
+      type: String,
+      maxlength: [500, "Delivery notes too long"],
     },
   },
   {
@@ -79,6 +98,10 @@ orderSchema.pre(/^find/, function (next) {
   }).populate({
     path: "items.product",
     select: "title imageCover",
+  }).populate({
+    path: "deliveryGuy",
+    select: "name phone avatar",
+    match: { role: "delivery" },
   });
   next();
 });

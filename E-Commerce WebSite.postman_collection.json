@@ -2969,6 +2969,46 @@
                 }
               },
               "response": []
+            },
+            {
+              "name": "uploadProfileImage",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{JWT}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{mainHost}}/api/v1/seller/profile-image",
+                  "host": [
+                    "{{mainHost}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "seller",
+                    "profile-image"
+                  ]
+                }
+              },
+              "response": []
             }
           ]
         },
@@ -4339,6 +4379,1067 @@
               ]
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Avatar Upload",
+      "item": [
+        {
+          "name": "Upload User Avatar",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/user/avatar",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "avatar"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payment Methods",
+      "item": [
+        {
+          "name": "Create Payment Method",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Credit Card\",\n    \"type\": \"card\",\n    \"isActive\": true,\n    \"processingFee\": 2.5,\n    \"description\": \"Pay with credit/debit card\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/payment-methods",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment-methods"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Payment Methods",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/payment-methods",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment-methods"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payment Method",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/payment-methods/:methodId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment-methods",
+                ":methodId"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Payment Method",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Method\",\n    \"processingFee\": 3.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/payment-methods/:methodId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment-methods",
+                ":methodId"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Payment Method",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/payment-methods/:methodId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payment-methods",
+                ":methodId"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Social Links",
+      "item": [
+        {
+          "name": "Create Social Link",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"platform\": \"facebook\",\n    \"url\": \"https://facebook.com/yourstore\",\n    \"icon\": \"fab fa-facebook\",\n    \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/social-links",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "social-links"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Social Links",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/social-links",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "social-links"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Social Link",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/social-links/:linkId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "social-links",
+                ":linkId"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Social Link",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"url\": \"https://updated-url.com\",\n    \"isActive\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/social-links/:linkId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "social-links",
+                ":linkId"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Social Link",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/social-links/:linkId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "social-links",
+                ":linkId"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Privacy Policy",
+      "item": [
+        {
+          "name": "Create Privacy Policy",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Privacy Policy\",\n    \"content\": \"Your privacy policy content here...\",\n    \"version\": \"1.0\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/privacy-policy",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "privacy-policy"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Privacy Policy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/privacy-policy/current",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "privacy-policy",
+                "current"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Privacy Policies",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/privacy-policy",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "privacy-policy"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Privacy Policy",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"Updated privacy policy content\",\n    \"version\": \"1.1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/privacy-policy/:policyId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "privacy-policy",
+                ":policyId"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Privacy Policy",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/privacy-policy/:policyId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "privacy-policy",
+                ":policyId"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/notifications/my-notifications",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "my-notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/notifications/:notificationId/read",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                ":notificationId",
+                "read"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Notification Preferences",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"orderUpdates\": true,\n    \"promotions\": false,\n    \"newsletter\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/user/notification-preferences",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "notification-preferences"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Notification (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"recipient\": \"user_id\",\n    \"type\": \"order_update\",\n    \"title\": \"Order Shipped\",\n    \"message\": \"Your order has been shipped\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/notifications",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Notifications (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/notifications",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Notification (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/notifications/:notificationId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                ":notificationId"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Delivery System",
+      "item": [
+        {
+          "name": "Get Nearby Orders",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/orders/nearby?lat=30.0444&lng=31.2357&maxDistance=5000",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "nearby"
+              ],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "30.0444"
+                },
+                {
+                  "key": "lng",
+                  "value": "31.2357"
+                },
+                {
+                  "key": "maxDistance",
+                  "value": "5000"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Delivery Location",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"location\": {\n        \"type\": \"Point\",\n        \"coordinates\": [31.2357, 30.0444]\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/user/profile",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "user",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Seller Application System",
+      "item": [
+        {
+          "name": "Check Eligibility",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/seller-applications/eligibility",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller-applications",
+                "eligibility"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Application",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"businessName\": \"My Store\",\n    \"businessType\": \"individual\",\n    \"businessAddress\": \"123 Business St\",\n    \"businessPhone\": \"+1234567890\",\n    \"taxId\": \"123-45-6789\",\n    \"bankAccountNumber\": \"1234567890\",\n    \"bankAccountName\": \"John Doe\",\n    \"bankName\": \"Example Bank\",\n    \"businessDescription\": \"Selling quality products...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/seller-applications/apply",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller-applications",
+                "apply"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Application Status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/seller-applications/my-status",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller-applications",
+                "my-status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Applications (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/seller-applications/admin/applications?page=1&limit=10&status=pending",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller-applications",
+                "admin",
+                "applications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Specific Application (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mainHost}}/api/v1/seller-applications/admin/applications/:applicationId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller-applications",
+                "admin",
+                "applications",
+                ":applicationId"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Application (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reviewNotes\": \"Application approved. Welcome to our platform!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/seller-applications/admin/approve/:applicationId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller-applications",
+                "admin",
+                "approve",
+                ":applicationId"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Decline Application (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{JWT}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reviewNotes\": \"Missing tax documentation. Please resubmit.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{mainHost}}/api/v1/seller-applications/admin/decline/:applicationId",
+              "host": [
+                "{{mainHost}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seller-applications",
+                "admin",
+                "decline",
+                ":applicationId"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },

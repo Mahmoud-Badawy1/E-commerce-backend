@@ -5,6 +5,51 @@ const asyncHandler = require("express-async-handler");
 const ApiError = require("../utils/apiError");
 const ApiFeatures = require("../utils/apiFeatures");
 const slugify = require("slugify");
+const uploadToCloudinary = require("../utils/uploadToCloudinary");
+
+// Upload product images to Cloudinary
+exports.uploadProductImages = asyncHandler(async (req, res, next) => {
+  if (!req.files || (!req.files.imageCover && !req.files.images)) {
+    return next(new ApiError("Please upload product images", 400));
+  }
+
+  try {
+    let imageCoverUrl = null;
+    let imageUrls = [];
+
+    // Upload cover image
+    if (req.files.imageCover && req.files.imageCover[0]) {
+      imageCoverUrl = await uploadToCloudinary.uploadSingle(
+        req.files.imageCover[0].buffer, 
+        "products", 
+        800, 
+        600
+      );
+    }
+
+    // Upload additional images
+    if (req.files.images && req.files.images.length > 0) {
+      const imageBuffers = req.files.images.map(file => file.buffer);
+      imageUrls = await uploadToCloudinary.uploadMultiple(
+        imageBuffers, 
+        "products", 
+        800, 
+        600
+      );
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Product images uploaded successfully",
+      data: {
+        imageCover: imageCoverUrl,
+        images: imageUrls,
+      },
+    });
+  } catch (error) {
+    return next(new ApiError(`Image upload failed: ${error.message}`, 500));
+  }
+});
 
 exports.createProduct = controllerHandler.create(productModel);
 

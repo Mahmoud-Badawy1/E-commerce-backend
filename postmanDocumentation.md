@@ -1654,6 +1654,381 @@ This document provides comprehensive documentation for all Postman requests in t
   2. Send request.
 - **Response**: Marked as recovered.
 
+## Avatar Upload
+
+### uploadUserAvatar
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/user/avatar`
+- **Auth**: Bearer (Login required)
+- **Body**: Form-data with file field `avatar` (image file)
+- **Steps**:
+  1. Select image file for avatar field.
+  2. Send request.
+- **Response**: User data with updated avatar URL.
+
+## Payment Methods
+
+### createPaymentMethod
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/payment-methods`
+- **Auth**: Bearer (Admin only)
+- **Body** (JSON):
+  ```json
+  {
+    "name": "Credit Card",
+    "type": "card",
+    "isActive": true,
+    "processingFee": 2.5,
+    "description": "Pay with credit/debit card"
+  }
+  ```
+- **Steps**:
+  1. Fill payment method details.
+  2. Send request.
+- **Response**: Created payment method.
+
+### getAllPaymentMethods
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/payment-methods`
+- **Auth**: None
+- **Body**: None
+- **Steps**: Send request.
+- **Response**: List of active payment methods.
+
+### getPaymentMethod
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/payment-methods/{methodId}`
+- **Auth**: None
+- **Body**: None
+- **Steps**: Replace {methodId} with actual ID.
+- **Response**: Payment method details.
+
+### updatePaymentMethod
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/payment-methods/{methodId}`
+- **Auth**: Bearer (Admin only)
+- **Body** (JSON): Fields to update
+- **Steps**:
+  1. Replace {methodId} with actual ID.
+  2. Send updated fields.
+- **Response**: Updated payment method.
+
+### deletePaymentMethod
+- **Method**: DELETE
+- **URL**: `{{mainHost}}/api/v1/payment-methods/{methodId}`
+- **Auth**: Bearer (Admin only)
+- **Body**: None
+- **Steps**: Replace {methodId} with actual ID.
+- **Response**: Success message.
+
+## Social Links
+
+### createSocialLink
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/social-links`
+- **Auth**: Bearer (Admin only)
+- **Body** (JSON):
+  ```json
+  {
+    "platform": "facebook",
+    "url": "https://facebook.com/yourstore",
+    "icon": "fab fa-facebook",
+    "isActive": true
+  }
+  ```
+- **Steps**:
+  1. Fill social link details.
+  2. Send request.
+- **Response**: Created social link.
+
+### getAllSocialLinks
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/social-links`
+- **Auth**: None
+- **Body**: None
+- **Steps**: Send request.
+- **Response**: List of active social links.
+
+### getSocialLink
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/social-links/{linkId}`
+- **Auth**: None
+- **Body**: None
+- **Steps**: Replace {linkId} with actual ID.
+- **Response**: Social link details.
+
+### updateSocialLink
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/social-links/{linkId}`
+- **Auth**: Bearer (Admin only)
+- **Body** (JSON): Fields to update
+- **Steps**:
+  1. Replace {linkId} with actual ID.
+  2. Send updated fields.
+- **Response**: Updated social link.
+
+### deleteSocialLink
+- **Method**: DELETE
+- **URL**: `{{mainHost}}/api/v1/social-links/{linkId}`
+- **Auth**: Bearer (Admin only)
+- **Body**: None
+- **Steps**: Replace {linkId} with actual ID.
+- **Response**: Success message.
+
+## Privacy Policy
+
+### createPrivacyPolicy
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/privacy-policy`
+- **Auth**: Bearer (Admin only)
+- **Body** (JSON):
+  ```json
+  {
+    "title": "Privacy Policy",
+    "content": "Your privacy policy content here...",
+    "version": "1.0"
+  }
+  ```
+- **Steps**:
+  1. Fill policy details.
+  2. Send request.
+- **Response**: Created privacy policy.
+
+### getCurrentPrivacyPolicy
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/privacy-policy/current`
+- **Auth**: None
+- **Body**: None
+- **Steps**: Send request.
+- **Response**: Current active privacy policy.
+
+### getAllPrivacyPolicies
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/privacy-policy`
+- **Auth**: Bearer (Admin only)
+- **Body**: None
+- **Steps**: Send request.
+- **Response**: List of all policy versions.
+
+### updatePrivacyPolicy
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/privacy-policy/{policyId}`
+- **Auth**: Bearer (Admin only)
+- **Body** (JSON): Fields to update
+- **Steps**:
+  1. Replace {policyId} with actual ID.
+  2. Send updated fields.
+- **Response**: Updated privacy policy.
+
+### deletePrivacyPolicy
+- **Method**: DELETE
+- **URL**: `{{mainHost}}/api/v1/privacy-policy/{policyId}`
+- **Auth**: Bearer (Admin only)
+- **Body**: None
+- **Steps**: Replace {policyId} with actual ID.
+- **Response**: Success message.
+
+## Notifications
+
+### getMyNotifications
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/notifications/my-notifications`
+- **Auth**: Bearer (Login required)
+- **Body**: None
+- **Steps**: Send request.
+- **Response**: List of user's notifications.
+
+### markNotificationAsRead
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/notifications/{notificationId}/read`
+- **Auth**: Bearer (Login required)
+- **Body**: None
+- **Steps**: Replace {notificationId} with actual ID.
+- **Response**: Updated notification.
+
+### updateNotificationPreferences
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/user/notification-preferences`
+- **Auth**: Bearer (Login required)
+- **Body** (JSON):
+  ```json
+  {
+    "orderUpdates": true,
+    "promotions": false,
+    "newsletter": true
+  }
+  ```
+- **Steps**:
+  1. Fill preference settings.
+  2. Send request.
+- **Response**: Updated user preferences.
+
+### createNotification
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/notifications`
+- **Auth**: Bearer (Admin only)
+- **Body** (JSON):
+  ```json
+  {
+    "recipient": "user_id",
+    "type": "order_update",
+    "title": "Order Shipped",
+    "message": "Your order has been shipped"
+  }
+  ```
+- **Steps**:
+  1. Fill notification details.
+  2. Send request.
+- **Response**: Created notification.
+
+### getAllNotifications
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/notifications`
+- **Auth**: Bearer (Admin only)
+- **Body**: None
+- **Steps**: Send request.
+- **Response**: List of all notifications.
+
+### deleteNotification
+- **Method**: DELETE
+- **URL**: `{{mainHost}}/api/v1/notifications/{notificationId}`
+- **Auth**: Bearer (Admin only)
+- **Body**: None
+- **Steps**: Replace {notificationId} with actual ID.
+- **Response**: Success message.
+
+## Delivery System
+
+### getNearbyOrders
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/orders/nearby?lat=LATITUDE&lng=LONGITUDE&maxDistance=5000`
+- **Auth**: Bearer (Delivery role required)
+- **Body**: None
+- **Steps**:
+  1. Replace LATITUDE and LONGITUDE with coordinates.
+  2. Optionally adjust maxDistance (in meters).
+  3. Send request.
+- **Response**: List of nearby orders for delivery.
+
+### updateDeliveryLocation
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/user/profile`
+- **Auth**: Bearer (Login required)
+- **Body** (JSON):
+  ```json
+  {
+    "location": {
+      "type": "Point",
+      "coordinates": [longitude, latitude]
+    }
+  }
+  ```
+- **Steps**:
+  1. Fill coordinates array with [longitude, latitude].
+  2. Send request.
+- **Response**: Updated user profile.
+
+## Seller Application System
+
+### checkEligibility
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/seller-applications/eligibility`
+- **Auth**: Bearer (Login required)
+- **Body**: None
+- **Steps**: Send request.
+- **Response**: Eligibility status and existing applications.
+
+### submitApplication
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/seller-applications/apply`
+- **Auth**: Bearer (Login required)
+- **Body** (JSON):
+  ```json
+  {
+    "businessName": "My Store",
+    "businessType": "individual",
+    "businessAddress": "123 Business St",
+    "businessPhone": "+1234567890",
+    "taxId": "123-45-6789",
+    "bankAccountNumber": "1234567890",
+    "bankAccountName": "John Doe",
+    "bankName": "Example Bank",
+    "businessDescription": "Selling quality products..."
+  }
+  ```
+- **Steps**:
+  1. Fill all business details.
+  2. Send request.
+- **Response**: Submitted application.
+
+### checkApplicationStatus
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/seller-applications/my-status`
+- **Auth**: Bearer (Login required)
+- **Body**: None
+- **Steps**: Send request.
+- **Response**: Current application status.
+
+### getAllApplications
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/seller-applications/admin/applications?page=1&limit=10&status=pending`
+- **Auth**: Bearer (Admin only)
+- **Body**: None
+- **Steps**:
+  1. Optional: Add query params for pagination and filtering.
+  2. Send request.
+- **Response**: List of seller applications.
+
+### getSpecificApplication
+- **Method**: GET
+- **URL**: `{{mainHost}}/api/v1/seller-applications/admin/applications/{applicationId}`
+- **Auth**: Bearer (Admin only)
+- **Body**: None
+- **Steps**: Replace {applicationId} with actual ID.
+- **Response**: Application details.
+
+### approveApplication
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/seller-applications/admin/approve/{applicationId}`
+- **Auth**: Bearer (Admin only)
+- **Body** (JSON):
+  ```json
+  {
+    "reviewNotes": "Application approved. Welcome to our platform!"
+  }
+  ```
+- **Steps**:
+  1. Replace {applicationId} with actual ID.
+  2. Add review notes.
+  3. Send request.
+- **Response**: Approved application (creates seller profile automatically).
+
+### declineApplication
+- **Method**: PUT
+- **URL**: `{{mainHost}}/api/v1/seller-applications/admin/decline/{applicationId}`
+- **Auth**: Bearer (Admin only)
+- **Body** (JSON):
+  ```json
+  {
+    "reviewNotes": "Missing tax documentation. Please resubmit."
+  }
+  ```
+- **Steps**:
+  1. Replace {applicationId} with actual ID.
+  2. Add review notes.
+  3. Send request.
+- **Response**: Declined application.
+
+### uploadSellerProfileImage
+- **Method**: POST
+- **URL**: `{{mainHost}}/api/v1/seller/profile-image`
+- **Auth**: Bearer (Seller role required)
+- **Body**: Form-data with file field `image` (image file)
+- **Steps**:
+  1. Select image file for image field.
+  2. Send request.
+- **Response**: Seller data with updated profile image URL.
+
 ## Notes
 - **Ordering Process**: Authenticate > Add to cart > Get cart ID > Create order.
 - **Seller Operations**: Sellers can manage their products and view orders.

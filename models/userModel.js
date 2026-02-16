@@ -52,10 +52,25 @@ const userSchema = new mongoose.Schema(
     profileImage: {
       type: String,
     },
+    avatar: {
+      type: String, // Cloudinary URL for avatar
+    },
     role: {
       type: String,
-      enum: ["admin", "accountant", "seller", "customer", "affiliate"],
+      enum: ["admin", "accountant", "seller", "customer", "affiliate", "delivery"],
       default: "customer",
+    },
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+      },
+    },
+    city: {
+      type: String,
     },
     active: {
       type: Boolean,
@@ -81,6 +96,15 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
     },
+    notificationPreferences: {
+      general: { type: Boolean, default: true },
+      special_offers: { type: Boolean, default: true },
+      promo_discounts: { type: Boolean, default: true },
+      payments: { type: Boolean, default: false },
+      cashback: { type: Boolean, default: false },
+      app_updates: { type: Boolean, default: true },
+      new_service: { type: Boolean, default: true },
+    },
   },
   { timestamps: true }
 );
@@ -91,11 +115,15 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// Add 2dsphere index for location
+userSchema.index({ location: "2dsphere" });
+
 const SetImageURL = (doc) => {
   if (doc.profileImage) {
     const imageURL = `${process.env.BASE_URL}/users/${doc.profileImage}`;
     doc.profileImage = imageURL;
   }
+  // Avatar is already a full Cloudinary URL, no need to modify
 };
 
 userSchema.post("init", (doc) => {

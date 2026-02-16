@@ -74,4 +74,38 @@ router
     orderController.deleteOrder
   );
 
+// Admin delivery assignment routes
+router
+  .route("/admin/assign-delivery")
+  .post(
+    authController.protect,
+    authController.allowedTo("admin"),
+    orderController.assignDeliveryGuy
+  );
+
+router
+  .route("/admin/unassign-delivery/:orderId")
+  .put(
+    authController.protect,
+    authController.allowedTo("admin"),
+    orderController.unassignDeliveryGuy
+  );
+
+router
+  .route("/admin/delivery-guys")
+  .get(
+    authController.protect,
+    authController.allowedTo("admin"),
+    orderController.getDeliveryGuys
+  );
+
+// Customer delivery details route
+router
+  .route("/delivery/:orderId")
+  .get(
+    authController.protect,
+    authController.allowedTo("customer"),
+    orderController.getMyOrderDeliveryDetails
+  );
+
 module.exports = router;
