@@ -25,6 +25,15 @@ router
     sellerApplicationController.submitApplication
   );
 
+// Alternative endpoint for application submission
+router
+  .route("/")
+  .post(
+    authController.allowedTo("customer"),
+    sellerApplicationValidator.submitApplicationValidator,
+    sellerApplicationController.submitApplication
+  );
+
 // Customer: Get my application status
 router
   .route("/my-status")
@@ -33,9 +42,13 @@ router
     sellerApplicationController.getMyApplicationStatus
   );
 
-// Customer: Update my pending application
+// Customer: Get and Update my application
 router
   .route("/my-application")
+  .get(
+    authController.allowedTo("customer"),
+    sellerApplicationController.getMyApplicationStatus
+  )
   .put(
     authController.allowedTo("customer"),
     sellerApplicationValidator.updateApplicationValidator,
