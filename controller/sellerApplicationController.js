@@ -190,10 +190,19 @@ exports.approveApplication = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Application is already approved", 400));
   }
 
+  // Get the user ID (handle both populated and unpopulated cases)
+  const userId = application.user._id || application.user;
+
   // Check if user already has a seller profile (edge case)
-  const existingSeller = await sellerModel.findOne({ userId: application.user._id });
+  const existingSeller = await sellerModel.findOne({ userId: userId });
   if (existingSeller) {
     return next(new ApiError("User already has a seller profile", 400));
+  }
+
+  // Verify user exists
+  const user = await userModel.findById(userId);
+  if (!user) {
+    return next(new ApiError("User not found", 404));
   }
 
   // Update application status
@@ -204,14 +213,15 @@ exports.approveApplication = asyncHandler(async (req, res, next) => {
   await application.save();
 
   // Update user role to seller
-  await userModel.findByIdAndUpdate(application.user._id, { role: "seller" });
+  user.role = "seller";
+  await user.save();
 
   // Create seller profile
   await sellerModel.create({
-    userId: application.user._id,
+    userId: userId,
     firstName: application.firstName,
     lastName: application.lastName,
-    email: application.user.email,
+    email: user.email,
     phone: application.phone,
     country: application.country,
     address: application.address,
@@ -219,7 +229,7 @@ exports.approveApplication = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    message: "Application approved successfully. Seller profile created.",
+    message: "Application approved successfully. User role updated to seller and seller profile created.",
     data: application,
   });
 });
