@@ -21,7 +21,16 @@ router
   .get(
     variationValidator.checkVariationStockValidator,
     variationController.checkVariationStock
+  )
+  .post(
+    variationValidator.checkVariationStockValidator,
+    variationController.checkVariationStock
   );
+
+// Smart filtering: Get available options based on selection
+router
+  .route("/:productId/variations/available-options")
+  .post(variationController.getAvailableOptions);
 
 // Seller variation routes
 router
@@ -40,6 +49,16 @@ router
     authController.allowedTo("seller"),
     variationValidator.bulkAddVariationsValidator,
     variationController.bulkAddVariations
+  );
+
+// Generate all combinations (Cartesian product)
+router
+  .route("/:productId/variations/generate-combinations")
+  .post(
+    authController.protect,
+    authController.allowedTo("seller"),
+    variationValidator.generateCombinationsValidator,
+    variationController.generateCombinations
   );
 
 router

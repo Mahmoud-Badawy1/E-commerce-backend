@@ -93,79 +93,76 @@ const productSchema = new mongoose.Schema(
       enum: ["draft", "published"],
       default: "published",
     },
-    // Product has variations (colors, sizes, etc.)
+    // Product has variations (dynamic attributes)
     hasVariations: {
       type: Boolean,
       default: false,
     },
-    // Available colors for this product
-    colors: {
-      type: [String],
-      default: [],
-    },
-    // Available sizes for this product
-    sizes: {
-      type: [String],
-      default: [],
-    },
-    // Variations with stock tracking
-    variations: [
-      {
-        color: {
-          type: String,
-          required: true,
-        },
-        size: {
-          type: String,
-          required: true,
-        },
-        sku: {
-          type: String,
-          required: true,
-          trim: true,
-          uppercase: true,
-        },
-        price: {
-          type: Number,
-        },
-        discountPercentage: {
-          type: Number,
-          min: [0, "Discount cannot be negative"],
-          max: [100, "Discount cannot exceed 100%"],
-          default: 0,
-        },
-        priceAfterDiscount: {
-          type: Number,
-        },
-        quantity: {
-          type: Number,
-          required: [true, "Variation quantity is required"],
-          min: [0, "Quantity cannot be negative"],
-          default: 0,
-        },
-        reservedStock: {
-          type: Number,
-          default: 0,
-          min: [0, "Reserved stock cannot be negative"],
-        },
-        lowStockThreshold: {
-          type: Number,
-          default: 5,
-          min: [0, "Low stock threshold cannot be negative"],
-        },
-        isLowStock: {
-          type: Boolean,
-          default: false,
-        },
-        image: {
-          type: String,
-        },
-        isActive: {
-          type: Boolean,
-          default: true,
-        },
+    // Dynamic variations structure
+    variations: {
+      // Dynamic axes (e.g., ["Color", "Storage"], ["Size", "Material"])
+      axes: {
+        type: [String],
+        default: [],
       },
-    ],
+      // Variation items
+      items: [
+        {
+          sku: {
+            type: String,
+            required: true,
+            trim: true,
+            uppercase: true,
+          },
+          // Dynamic options as key-value pairs (e.g., { "Color": "Black", "Storage": "128GB" })
+          options: {
+            type: Map,
+            of: String,
+            required: true,
+          },
+          price: {
+            type: Number,
+            required: true,
+          },
+          discountPercentage: {
+            type: Number,
+            min: [0, "Discount cannot be negative"],
+            max: [100, "Discount cannot exceed 100%"],
+            default: 0,
+          },
+          priceAfterDiscount: {
+            type: Number,
+          },
+          quantity: {
+            type: Number,
+            required: [true, "Variation quantity is required"],
+            min: [0, "Quantity cannot be negative"],
+            default: 0,
+          },
+          reservedStock: {
+            type: Number,
+            default: 0,
+            min: [0, "Reserved stock cannot be negative"],
+          },
+          lowStockThreshold: {
+            type: Number,
+            default: 5,
+            min: [0, "Low stock threshold cannot be negative"],
+          },
+          isLowStock: {
+            type: Boolean,
+            default: false,
+          },
+          image: {
+            type: String,
+          },
+          isActive: {
+            type: Boolean,
+            default: true,
+          },
+        },
+      ],
+    },
     // Inventory Management
     reservedStock: {
       type: Number,
@@ -248,10 +245,11 @@ productSchema.pre("save", function (next) {
   }
   
   // Calculate price after discount for each variation
-  if (this.variations && this.variations.length > 0) {
-    this.variations.forEach((variation) => {
-      const varPrice = variation.price || this.price;
-      const varDiscount = variation.discountPercentage || this.discountPercentage || 0;
+  if (this.variations && this.variations.items && this.variations.items.length > 0) {
+    this.variations.items.forEach((variation) => {
+      // Each variation has its own price and discount
+      const varPrice = variation.price;
+      const varDiscount = variation.discountPercentage || 0;
       const discounted = varPrice * (1 - varDiscount / 100);
       variation.priceAfterDiscount = Math.ceil(discounted);
       
@@ -325,36 +323,57 @@ productSchema.methods.consumeStock = function (quantity, orderId) {
   return this;
 };
 
-// Method to find a variation by color and size
-productSchema.methods.findVariation = function (color, size) {
-  if (!this.variations || this.variations.length === 0) {
+// Method to find a variation by options (e.g., { "Color": "Black", "Storage": "128GB" })
+productSchema.methods.findVariation = function (options) {
+  if (!this.variations || !this.variations.items || this.variations.items.length === 0) {
     return null;
   }
-  return this.variations.find(
-    (v) => v.color.toLowerCase() === color.toLowerCase() && 
-           v.size.toLowerCase() === size.toLowerCase()
+  
+  return this.variations.items.find((variation) => {
+    // Check if all option keys match
+    const variationOptions = variation.options;
+    const optionKeys = Object.keys(options);
+    
+    return optionKeys.every((key) => {
+      const varValue = variationOptions.get(key);
+      return varValue && varValue.toLowerCase() === options[key].toLowerCase();
+    });
+  });
+};
+
+// Method to find variation by SKU
+productSchema.methods.findVariationBySku = function (sku) {
+  if (!this.variations || !this.variations.items || this.variations.items.length === 0) {
+    return null;
+  }
+  
+  return this.variations.items.find(
+    (v) => v.sku.toUpperCase() === sku.toUpperCase()
   );
 };
 
 // Method to get available stock for a variation
-productSchema.methods.getVariationAvailableStock = function (color, size) {
-  const variation = this.findVariation(color, size);
+productSchema.methods.getVariationAvailableStock = function (options) {
+  const variation = this.findVariation(options);
   if (!variation) {
-    throw new Error(`Variation not found: ${color} - ${size}`);
+    const optionsStr = JSON.stringify(options);
+    throw new Error(`Variation not found: ${optionsStr}`);
   }
   return Math.max(0, variation.quantity - variation.reservedStock);
 };
 
 // Method to reserve stock for a variation
-productSchema.methods.reserveVariationStock = function (color, size, quantity) {
-  const variation = this.findVariation(color, size);
+productSchema.methods.reserveVariationStock = function (options, quantity) {
+  const variation = this.findVariation(options);
   if (!variation) {
-    throw new Error(`Variation not found: ${color} - ${size}`);
+    const optionsStr = JSON.stringify(options);
+    throw new Error(`Variation not found: ${optionsStr}`);
   }
   
   const availableStock = variation.quantity - variation.reservedStock;
   if (availableStock < quantity) {
-    throw new Error(`Insufficient stock for ${color} - ${size}. Available: ${availableStock}`);
+    const optionsStr = JSON.stringify(options);
+    throw new Error(`Insufficient stock for ${optionsStr}. Available: ${availableStock}`);
   }
   
   variation.reservedStock += quantity;
@@ -362,10 +381,11 @@ productSchema.methods.reserveVariationStock = function (color, size, quantity) {
 };
 
 // Method to release reserved stock for a variation
-productSchema.methods.releaseVariationStock = function (color, size, quantity) {
-  const variation = this.findVariation(color, size);
+productSchema.methods.releaseVariationStock = function (options, quantity) {
+  const variation = this.findVariation(options);
   if (!variation) {
-    throw new Error(`Variation not found: ${color} - ${size}`);
+    const optionsStr = JSON.stringify(options);
+    throw new Error(`Variation not found: ${optionsStr}`);
   }
   
   variation.reservedStock = Math.max(0, variation.reservedStock - quantity);
@@ -373,60 +393,65 @@ productSchema.methods.releaseVariationStock = function (color, size, quantity) {
 };
 
 // Method to consume stock for a variation (reduce quantity and reserved)
-productSchema.methods.consumeVariationStock = function (color, size, quantity, orderId) {
-  const variation = this.findVariation(color, size);
+productSchema.methods.consumeVariationStock = function (options, quantity, orderId) {
+  const variation = this.findVariation(options);
   if (!variation) {
-    throw new Error(`Variation not found: ${color} - ${size}`);
+    const optionsStr = JSON.stringify(options);
+    throw new Error(`Variation not found: ${optionsStr}`);
   }
   
   if (variation.reservedStock < quantity) {
-    throw new Error(`Insufficient reserved stock for ${color} - ${size}`);
+    const optionsStr = JSON.stringify(options);
+    throw new Error(`Insufficient reserved stock for ${optionsStr}`);
   }
   
   variation.quantity -= quantity;
   variation.reservedStock -= quantity;
-  this.addStockHistory("sale", quantity, orderId, `Stock consumed for variation: ${color} - ${size}`);
+  const optionsStr = JSON.stringify(options);
+  this.addStockHistory("sale", quantity, orderId, `Stock consumed for variation: ${optionsStr}`);
   return this;
 };
 
 // Method to get total available stock across all variations
 productSchema.methods.getTotalAvailableStock = function () {
-  if (!this.hasVariations || !this.variations || this.variations.length === 0) {
+  if (!this.hasVariations || !this.variations || !this.variations.items || this.variations.items.length === 0) {
     return this.availableStock;
   }
   
-  return this.variations.reduce((total, variation) => {
+  return this.variations.items.reduce((total, variation) => {
     return total + Math.max(0, variation.quantity - variation.reservedStock);
   }, 0);
 };
 
 // Method to get low stock variations
 productSchema.methods.getLowStockVariations = function () {
-  if (!this.variations || this.variations.length === 0) {
+  if (!this.variations || !this.variations.items || this.variations.items.length === 0) {
     return [];
   }
   
-  return this.variations.filter((variation) => {
+  return this.variations.items.filter((variation) => {
     const availableStock = variation.quantity - variation.reservedStock;
     return availableStock <= variation.lowStockThreshold && variation.isActive;
   });
 };
 
 // Method to update variation stock
-productSchema.methods.updateVariationStock = function (color, size, quantity, type = "adjustment") {
-  const variation = this.findVariation(color, size);
+productSchema.methods.updateVariationStock = function (options, quantity, type = "adjustment") {
+  const variation = this.findVariation(options);
   if (!variation) {
-    throw new Error(`Variation not found: ${color} - ${size}`);
+    const optionsStr = JSON.stringify(options);
+    throw new Error(`Variation not found: ${optionsStr}`);
   }
   
   const oldQuantity = variation.quantity;
   variation.quantity = quantity;
   
+  const optionsStr = JSON.stringify(options);
   this.addStockHistory(
     type,
     quantity - oldQuantity,
     null,
-    `Stock ${type} for variation: ${color} - ${size}`
+    `Stock ${type} for variation: ${optionsStr}`
   );
   
   return this;

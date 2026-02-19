@@ -171,24 +171,77 @@ exports.adjustVariationStockValidator = [
   validatorMiddleware,
 ];
 
-// Validation for checking variation stock
+// Validation for checking variation stock (Updated for dynamic options)
 exports.checkVariationStockValidator = [
-  check("color")
-    .notEmpty()
-    .withMessage("Color is required")
-    .isString()
-    .withMessage("Color must be a string"),
-
-  check("size")
-    .notEmpty()
-    .withMessage("Size is required")
-    .isString()
-    .withMessage("Size must be a string"),
+  check("variationOptions")
+    .optional()
+    .custom((value, { req }) => {
+      // For GET requests, it comes as string
+      if (req.method === 'GET' && typeof value === 'string') {
+        try {
+          JSON.parse(value);
+          return true;
+        } catch (error) {
+          throw new Error('variationOptions must be valid JSON');
+        }
+      }
+      // For POST requests, it should be an object
+      if (req.method === 'POST' && typeof value !== 'object') {
+        throw new Error('variationOptions must be an object');
+      }
+      return true;
+    }),
 
   check("quantity")
     .optional()
     .isInt({ min: 1 })
     .withMessage("Quantity must be a positive integer"),
+
+  validatorMiddleware,
+];
+
+// Validation for generate combinations
+exports.generateCombinationsValidator = [
+  check("axes")
+    .notEmpty()
+    .withMessage("axes array is required")
+    .isArray({ min: 1 })
+    .withMessage("axes must be a non-empty array"),
+
+  check("axes.*")
+    .isString()
+    .withMessage("Each axis must be a string"),
+
+  check("combinations")
+    .notEmpty()
+    .withMessage("combinations object is required")
+    .isObject()
+    .withMessage("combinations must be an object"),
+
+  check("defaultPrice")
+    .notEmpty()
+    .withMessage("defaultPrice is required")
+    .isNumeric()
+    .withMessage("defaultPrice must be a number")
+    .custom((value) => value >= 0)
+    .withMessage("defaultPrice must be a positive number"),
+
+  check("defaultQuantity")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("defaultQuantity must be a positive integer"),
+
+  check("priceVariations")
+    .optional()
+    .isObject()
+    .withMessage("priceVariations must be an object"),
+
+  check("discountPercentage")
+    .optional()
+    .isNumeric()
+    .withMessage("discountPercentage must be a number")
+    .custom((value) => value >= 0 && value <= 100)
+    .withMessage("discountPercentage must be between 0 and 100"),
 
   validatorMiddleware,
 ];

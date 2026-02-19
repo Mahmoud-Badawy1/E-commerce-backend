@@ -1,5 +1,22 @@
 # Product Variations - Seller Guide
 
+## ⚠️ BREAKING CHANGES - New Dynamic Variation System
+
+**Date:** February 2026
+
+The variation system has been completely redesigned to support **ANY product attributes**, not just colors and sizes!
+
+**Key Changes:**
+- ✅ Support for dynamic attributes (Storage, RAM, Material, Finish, etc.)
+- ✅ Each variation has its OWN price (prevents double-discount confusion)
+- ✅ Flexible structure: `variations: { axes: [], items: [{ options: {}, price, ... }] }`
+- ❌ Removed hardcoded `colors` and `sizes` arrays
+- ❌ No price inheritance from product (variation price is mandatory)
+
+**Migration Required:** Existing products with old variation structure need data migration.
+
+---
+
 ## Overview
 As a seller, you can create products with multiple variations (colors, sizes), manage their stock individually, and track inventory for each variation.
 
@@ -71,23 +88,38 @@ POST /api/products/seller
 Authorization: Bearer {seller_token}
 ```
 
-**Request Body (Bulk Variations):**
+**Request Body (Dynamic Variations):**
 ```json
 {
   "title": "Premium Cotton T-Shirt",
   "slug": "premium-cotton-tshirt",
   "sku": "TSHIRT-001",
   "description": "High-quality 100% cotton t-shirt with modern fit",
-  "price": 299.99,
-  "discountPercentage": 15,
   "imageCover": "https://cloudinary.com/.../tshirt-cover.jpg",
   "category": "65f7c0000000000000000003",
   "status": "published",
   "variationData": {
-    "colors": ["Red", "Blue", "Black", "White"],
-    "sizes": ["S", "M", "L", "XL", "XXL"],
-    "defaultQuantity": 20,
-    "defaultLowStockThreshold": 5
+    "axes": ["Color", "Size"],
+    "items": [
+      {
+        "options": { "Color": "Red", "Size": "S" },
+        "price": 255,
+        "discountPercentage": 15,
+        "quantity": 20,
+        "lowStockThreshold": 5
+      },
+      {
+        "options": { "Color": "Red", "Size": "M" },
+        "price": 255,
+        "quantity": 20
+      },
+      {
+        "options": { "Color": "Blue", "Size": "S" },
+        "price": 255,
+        "quantity": 20
+      }
+      // Add all 20 color-size combinations...
+    ]
   }
 }
 ```
@@ -102,26 +134,38 @@ Authorization: Bearer {seller_token}
       "_id": "65f8a1234567890abcdef123",
       "title": "Premium Cotton T-Shirt",
       "sku": "TSHIRT-001",
-      "price": 299.99,
       "hasVariations": true,
-      "colors": ["Red", "Blue", "Black", "White"],
-      "sizes": ["S", "M", "L", "XL", "XXL"],
-      "variations": [
-        {
-          "_id": "65f8b9876543210fedcba001",
-          "color": "Red",
-          "size": "S",
-          "sku": "TSHIRT-001-RED-S",
-          "quantity": 20
-        }
-        // ... 19 more variations
-      ]
+      "variations": {
+        "axes": ["Color", "Size"],
+        "items": [
+          {
+            "_id": "65f8b9876543210fedcba001",
+            "sku": "TSHIRT-001-RED-S",
+            "options": { "Color": "Red", "Size": "S" },
+            "price": 255,
+            "discountPercentage": 15,
+            "priceAfterDiscount": 217,
+            "quantity": 20,
+            "reservedStock": 0,
+            "isActive": true
+          },
+          {
+            "_id": "65f8b9876543210fedcba002",
+            "sku": "TSHIRT-001-RED-M",
+            "options": { "Color": "Red", "Size": "M" },
+            "price": 255,
+            "quantity": 20,
+            "isActive": true
+          }
+          // ... 18 more variations
+        ]
+      }
     },
     "addedVariations": [
-      "Red - S", "Red - M", "Red - L", "Red - XL", "Red - XXL",
-      "Blue - S", "Blue - M", "Blue - L", "Blue - XL", "Blue - XXL",
-      "Black - S", "Black - M", "Black - L", "Black - XL", "Black - XXL",
-      "White - S", "White - M", "White - L", "White - XL", "White - XXL"
+      "Color: Red, Size: S",
+      "Color: Red, Size: M",
+      "Color: Blue, Size: S"
+      // ... 17 more
     ]
   }
 }
@@ -129,92 +173,197 @@ Authorization: Bearer {seller_token}
 
 **What Just Happened:**
 - ✅ Created product AND 20 variations in ONE request!
-- ✅ All color-size combinations created automatically
-- ✅ Each variation has 20 items in stock
+- ✅ All attribute combinations created in one go
+- ✅ Each variation has its own price (no double discounts!)
 - ✅ Auto-generated SKUs for each variation
 - ✅ Ready to sell immediately!
 
+**✨ More Examples - Different Product Types:**
+
+**Example 1: Smartphone with Storage & Color**
+```json
+{
+  "title": "iPhone 15 Pro",
+  "sku": "IPHONE15PRO",
+  "imageCover": "https://...",
+  "category": "electronics_id",
+  "status": "published",
+  "variationData": {
+    "axes": ["Color", "Storage"],
+    "items": [
+      {
+        "options": { "Color": "Black", "Storage": "128GB" },
+        "price": 999,
+        "quantity": 50
+      },
+      {
+        "options": { "Color": "Black", "Storage": "256GB" },
+        "price": 1199,
+        "quantity": 30
+      },
+      {
+        "options": { "Color": "White", "Storage": "512GB" },
+        "price": 1399,
+        "quantity": 20
+      }
+    ]
+  }
+}
+```
+
+**Example 2: Furniture with Material & Finish**
+```json
+{
+  "title": "Modern Office Desk",
+  "sku": "DESK-MOD-001",
+  "imageCover": "https://...",
+  "category": "furniture_id",
+  "status": "published",
+  "variationData": {
+    "axes": ["Material", "Finish"],
+    "items": [
+      {
+        "options": { "Material": "Oak", "Finish": "Natural" },
+        "price": 450,
+        "quantity": 10
+      },
+      {
+        "options": { "Material": "Walnut", "Finish": "Dark Stain" },
+        "price": 550,
+        "quantity": 5
+      }
+    ]
+  }
+}
+```
+
+**Example 3: Laptop with Specs (3 attributes!)**
+```json
+{
+  "title": "Gaming Laptop Pro",
+  "sku": "LAPTOP-PRO",
+  "imageCover": "https://...",
+  "category": "computers_id",
+  "status": "published",
+  "variationData": {
+    "axes": ["RAM", "Storage", "GPU"],
+    "items": [
+      {
+        "options": { "RAM": "16GB", "Storage": "512GB SSD", "GPU": "RTX 3060" },
+        "price": 1299,
+        "quantity": 15
+      },
+      {
+        "options": { "RAM": "32GB", "Storage": "1TB SSD", "GPU": "RTX 4070" },
+        "price": 1899,
+        "discountPercentage": 10,
+        "quantity": 8
+      }
+    ]
+  }
+}
+```
+
 ---
 
-### 2. Bulk Add Variations (Creates All Combinations)
+### 2. Generate All Combinations (🚀 Smart Bulk - Recommended!)
 
 **Endpoint:**
 ```http
-POST /api/products/:productId/variations/bulk
+POST /api/products/:productId/variations/generate-combinations
 Authorization: Bearer {seller_token}
 ```
+
+**Purpose:** Automatically create ALL possible combinations from attribute arrays (Cartesian Product).
 
 **Request Body:**
 ```json
 {
-  "colors": ["Red", "Blue", "Black", "White"],
-  "sizes": ["S", "M", "L", "XL", "XXL"],
+  "axes": ["Color", "Size"],
+  "combinations": {
+    "Color": ["Red", "Blue", "Black", "White"],
+    "Size": ["S", "M", "L", "XL", "XXL"]
+  },
+  "defaultPrice": 255,
   "defaultQuantity": 20,
-  "defaultLowStockThreshold": 5
+  "priceVariations": {
+    "XL": 275,
+    "XXL": 299
+  },
+  "discountPercentage": 15
 }
 ```
 
-**Example Request:**
-```bash
-POST /api/products/65f8a1234567890abcdef123/variations/bulk
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-{
-  "colors": ["Red", "Blue", "Black", "White"],
-  "sizes": ["S", "M", "L", "XL", "XXL"],
-  "defaultQuantity": 20,
-  "defaultLowStockThreshold": 5
-}
-```
+**What This Does:**
+- Generates 4 colors × 5 sizes = **20 variations automatically**
+- XL variations get price 275 (override)
+- XXL variations get price 299 (override)
+- All others get defaultPrice 255
+- Each variation gets 20 items in stock
 
 **Response:**
 ```json
 {
   "status": "success",
-  "message": "20 variations added successfully",
+  "message": "20 variations generated successfully",
   "data": {
-    "added": [
-      "Red - S", "Red - M", "Red - L", "Red - XL", "Red - XXL",
-      "Blue - S", "Blue - M", "Blue - L", "Blue - XL", "Blue - XXL",
-      "Black - S", "Black - M", "Black - L", "Black - XL", "Black - XXL",
-      "White - S", "White - M", "White - L", "White - XL", "White - XXL"
+    "generated": 20,
+    "skipped": 0,
+    "addedVariations": [
+      "Red - S",
+      "Red - M",
+      "Red - L",
+      "Red - XL",
+      "Red - XXL",
+      "Blue - S",
+      "Blue - M",
+      "Blue - L",
+      "Blue - XL",
+      "Blue - XXL",
+      "Black - S",
+      "Black - M",
+      "Black - L",
+      "Black - XL",
+      "Black - XXL",
+      "White - S",
+      "White - M",
+      "White - L",
+      "White - XL",
+      "White - XXL"
     ],
-    "skipped": [],
-    "product": {
-      "_id": "65f8a1234567890abcdef123",
-      "title": "Premium Cotton T-Shirt",
-      "hasVariations": true,
-      "colors": ["Red", "Blue", "Black", "White"],
-      "sizes": ["S", "M", "L", "XL", "XXL"],
-      "variations": [
-        {
-          "_id": "65f8b9876543210fedcba001",
-          "color": "Red",
-          "size": "M",
-          "sku": "TSHIRT-001-RED-M",
-          "price": 299.99,
-          "discountPercentage": 15,
-          "priceAfterDiscount": 255,
-          "quantity": 20,
-          "reservedStock": 0,
-          "lowStockThreshold": 5,
-          "isLowStock": false,
-          "image": "https://cloudinary.com/.../tshirt-cover.jpg",
-          "isActive": true
-        }
-        // ... 19 more variations
-      ]
+    "skippedVariations": [],
+    "matrix": {
+      "Red": ["S", "M", "L", "XL", "XXL"],
+      "Blue": ["S", "M", "L", "XL", "XXL"],
+      "Black": ["S", "M", "L", "XL", "XXL"],
+      "White": ["S", "M", "L", "XL", "XXL"]
     }
   }
 }
 ```
 
-**What Happened:**
-- ✅ Created 4 colors × 5 sizes = 20 variations
-- ✅ Each variation has 20 items in stock
-- ✅ Auto-generated SKUs (e.g., TSHIRT-001-RED-M)
-- ✅ Each variation uses product's cover image by default
-- ✅ Product's `hasVariations` flag set to `true`
+**Example for Phone (3 Colors × 3 Storage = 9 variations):**
+```json
+{
+  "axes": ["Color", "Storage"],
+  "combinations": {
+    "Color": ["Black", "White", "Gold"],
+    "Storage": ["128GB", "256GB", "512GB"]
+  },
+  "defaultPrice": 999,
+  "priceVariations": {
+    "256GB": 1199,
+    "512GB": 1399
+  },
+  "defaultQuantity": 50
+}
+```
+
+**Benefits:**
+✅ Creates ALL combinations in one request
+✅ No need to manually list each variation
+✅ Support for price overrides per attribute value
+✅ Returns matrix for frontend smart filtering
 
 ---
 
@@ -226,16 +375,164 @@ POST /api/products/:productId/variations
 Authorization: Bearer {seller_token}
 ```
 
+**Request Body (Dynamic Attributes):**
+```json
+{
+  "options": {
+    "Color": "Green",
+    "Size": "XL"
+  },
+  "price": 255,
+  "discountPercentage": 10,
+  "quantity": 30,
+  "lowStockThreshold": 5,
+  "image": "https://cloudinary.com/.../tshirt-green.jpg"
+}
+```
+
+**Example for Phone (Storage + Color):**
+```json
+{
+  "options": {
+    "Storage": "1TB",
+    "Color": "Titanium Blue"
+  },
+  "price": 1599,
+  "quantity": 10
+}
+```
+
+**Example Request:**
+```bash
+POST /api/products/65f8a1234567890abcdef123/variations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+  "options": {
+    "Color": "Green",
+    "Size": "XL"
+  },
+  "price": 255,
+  "quantity": 30
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Variation added successfully",
+  "data": {
+    "variation": {
+      "_id": "65f8b9876543210fedcba999",
+      "sku": "TSHIRT-001-GREEN-XL",
+      "options": {
+        "Color": "Green",
+        "Size": "XL"
+      },
+      "price": 255,
+      "discountPercentage": 10,
+      "priceAfterDiscount": 230,
+      "quantity": 30,
+      "reservedStock": 0,
+      "lowStockThreshold": 5,
+      "isLowStock": false,
+      "image": "https://cloudinary.com/.../tshirt-green.jpg",
+      "isActive": true
+    }
+  }
+}
+```
+
+---
+
+### 3. Get All Product Variations
+
+**Endpoint:**
+```http
+GET /api/products/:productId/variations
+Authorization: Bearer {seller_token}
+```
+
+**Response (Enhanced with Smart Filtering Data):**
+```json
+{
+  "status": "success",
+  "data": {
+    "hasVariations": true,
+    "variations": {
+      "axes": ["Color", "Size"],
+      "availableOptionsByAxis": {
+        "Color": ["Red", "Blue", "Black", "White"],
+        "Size": ["S", "M", "L", "XL", "XXL"]
+      },
+      "matrix": {
+        "Red": ["S", "M", "L", "XL"],
+        "Blue": ["M", "L", "XL", "XXL"],
+        "Black": ["S", "M", "L"],
+        "White": ["L", "XL", "XXL"]
+      },
+      "items": [
+        {
+          "_id": "65f8b9876543210fedcba001",
+          "sku": "TSHIRT-001-RED-M",
+          "options": {
+            "Color": "Red",
+            "Size": "M"
+          },
+          "price": 255,
+          "discountPercentage": 15,
+          "priceAfterDiscount": 217,
+          "quantity": 50,
+          "reservedStock": 5,
+          "lowStockThreshold": 10,
+          "isLowStock": false,
+          "image": "https://cloudinary.com/.../tshirt-red.jpg",
+          "isActive": true
+        },
+        {
+          "_id": "65f8b9876543210fedcba002",
+          "sku": "TSHIRT-001-BLUE-L",
+          "options": {
+            "Color": "Blue",
+            "Size": "L"
+          },
+          "price": 255,
+          "quantity": 75,
+          "reservedStock": 3,
+          "isActive": true
+        }
+        // ... more variations (only active + available stock)
+      ]
+    }
+  }
+}
+```
+
+**New Smart Filtering Fields:**
+- **availableOptionsByAxis**: All unique values available per attribute (useful for UI filters)
+- **matrix**: Shows which Size values are available for each Color (enables Amazon-style progressive selection)
+- **items**: Only includes active variations with available stock
+
+---
+
+### 4. Update Variation
+
+**Endpoint:**
+```http
+PUT /api/products/:productId/variations/:variationId
+Authorization: Bearer {seller_token}
+```
+
 **Request Body:**
 ```json
 {
-  "color": "Green",
-  "size": "L",
-  "sku": "TSHIRT-001-GREEN-L",
-  "price": 329.99,
-  "discountPercentage": 10,
-  "quantity": 15,
-  "lowStockThreshold": 3,
+  "price": 349.99,
+  "discountPercentage": 20,
+  "quantity": 100,
+  "lowStockThreshold": 8,
+  "isActive": true
+}
   "image": "https://cloudinary.com/.../tshirt-green.jpg"
 }
 ```
@@ -1168,6 +1465,145 @@ Every stock change is recorded:
   ]
 }
 ```
+
+---
+
+## 🎯 Smart Filtering Workflow (Amazon-Style)
+
+### Get Available Options Based on Selection
+
+**Endpoint (Public - For Frontend):**
+```http
+POST /api/products/:productId/variations/available-options
+```
+
+**Purpose:** Enable progressive attribute selection. When user selects Color, show only available Sizes for that Color.
+
+**Example 1: User Selects Color First**
+
+**Request:**
+```json
+{
+  "selectedOptions": {
+    "Color": "Red"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "availableOptions": {
+      "Size": ["S", "M", "L", "XL"]
+    },
+    "matchingVariations": [
+      {
+        "_id": "65f8b001",
+        "options": {
+          "Color": "Red",
+          "Size": "S"
+        },
+        "price": 255,
+        "priceAfterDiscount": 217,
+        "quantity": 20,
+        "isLowStock": false
+      },
+      {
+        "_id": "65f8b002",
+        "options": {
+          "Color": "Red",
+          "Size": "M"
+        },
+        "price": 255,
+        "priceAfterDiscount": 217,
+        "quantity": 50,
+        "isLowStock": false
+      }
+      // ... Red-L, Red-XL
+    ]
+  }
+}
+```
+
+**Example 2: User Selects Both (Final Selection)**
+
+**Request:**
+```json
+{
+  "selectedOptions": {
+    "Color": "Red",
+    "Size": "M"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "availableOptions": {},
+    "matchingVariations": [
+      {
+        "_id": "65f8b002",
+        "options": {
+          "Color": "Red",
+          "Size": "M"
+        },
+        "price": 255,
+        "priceAfterDiscount": 217,
+        "quantity": 50,
+        "reservedStock": 5,
+        "isLowStock": false,
+        "image": "https://cloudinary.com/.../red-tshirt.jpg"
+      }
+    ]
+  }
+}
+```
+
+**Example 3: 3-Attribute Product (Phone)**
+
+**Request (User selected Color):**
+```json
+{
+  "selectedOptions": {
+    "Color": "Black"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "availableOptions": {
+      "Storage": ["128GB", "256GB", "512GB"],
+      "RAM": ["8GB", "12GB"]
+    },
+    "matchingVariations": [
+      // All Black phones with available stock
+    ]
+  }
+}
+```
+
+**Workflow:**
+1. Customer lands on product page
+2. GET `/api/products/:id/variations` → Get initial matrix
+3. User selects "Red" → POST `available-options` with `{Color: "Red"}`
+4. Frontend shows only Sizes available in Red
+5. User selects "M" → POST `available-options` with `{Color: "Red", Size: "M"}`
+6. Frontend shows final variation details
+
+**Benefits:**
+✅ No overwhelming dropdown with all combinations
+✅ Only show available options (no disabled selections)
+✅ Works with any number of attributes
+✅ Real-time stock awareness
 
 ---
 

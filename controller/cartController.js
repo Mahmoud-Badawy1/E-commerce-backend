@@ -35,11 +35,11 @@ exports.getAllProductsInCart = asyncHandler(async (req, res, next) => {
 });
 
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
-  const { productId, color, size, variationId } = req.body;
-  console.log("Adding product to cart",productId,color,size,variationId);
+  const { productId, variationOptions, variationId } = req.body;
+  console.log("Adding product to cart", productId, variationOptions, variationId);
   
   const product = await productModel.findById(productId);
-  console.log("Found product:",product);
+  console.log("Found product:", product);
   
   if (!product) {
     return next(new ApiError("Product not found", 404));
@@ -49,46 +49,60 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
   let itemPrice = product.priceAfterDiscount || product.price;
   let availableStock = product.quantity - product.reservedStock;
   
-  if (product.hasVariations && color && size) {
-    const variation = product.findVariation(color, size);
+  if (product.hasVariations && variationOptions) {
+    const variation = product.findVariation(variationOptions);
     if (!variation) {
-      return next(new ApiError(`Variation ${color} - ${size} not found`, 404));
+      const optionsStr = JSON.stringify(variationOptions);
+      return next(new ApiError(`Variation ${optionsStr} not found`, 404));
     }
     if (!variation.isActive) {
-      return next(new ApiError(`Variation ${color} - ${size} is not available`, 400));
+      const optionsStr = JSON.stringify(variationOptions);
+      return next(new ApiError(`Variation ${optionsStr} is not available`, 400));
     }
     itemPrice = variation.priceAfterDiscount || variation.price;
     availableStock = variation.quantity - variation.reservedStock;
     
     if (availableStock < 1) {
-      return next(new ApiError(`Variation ${color} - ${size} is out of stock`, 400));
+      const optionsStr = JSON.stringify(variationOptions);
+      return next(new ApiError(`Variation ${optionsStr} is out of stock`, 400));
     }
   } else if (availableStock < 1) {
     return next(new ApiError("Product is out of stock", 400));
   }
   
   let cart = await cartModel.findOne({ user: req.user._id });
-  console.log("Current cart:",cart);
+  console.log("Current cart:", cart);
 
   if (!cart) {
+    // Convert variationOptions object to Map
+    const optionsMap = variationOptions ? new Map(Object.entries(variationOptions)) : undefined;
+    
     cart = await cartModel.create({
       user: req.user._id,
       cartItems: [{ 
         product: productId, 
-        color: color, 
-        size: size, 
+        variationOptions: optionsMap,
         price: itemPrice,
         variationId: variationId
       }],
     });
-    console.log("Created new cart:",cart);
+    console.log("Created new cart:", cart);
   } else {
     const productIndex = cart.cartItems.findIndex(
       (item) => {
         if (variationId) {
           return item.variationId && item.variationId.toString() === variationId;
         }
-        return item.product.toString() == productId && item.color == color && item.size == size;
+        // Compare product and variation options
+        if (item.product.toString() !== productId) {
+          return false;
+        }
+        // If product has variations, compare options
+        if (variationOptions && item.variationOptions) {
+          const itemOptions = Object.fromEntries(item.variationOptions);
+          return JSON.stringify(itemOptions) === JSON.stringify(variationOptions);
+        }
+        return !variationOptions && !item.variationOptions;
       }
     );
     
@@ -104,10 +118,12 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
       cartItem.quantity = newQuantity;
       cart.cartItems[productIndex] = cartItem;
     } else {
+      // Convert variationOptions object to Map
+      const optionsMap = variationOptions ? new Map(Object.entries(variationOptions)) : undefined;
+      
       cart.cartItems.push({
         product: productId,
-        color: color,
-        size: size,
+        variationOptions: optionsMap,
         price: itemPrice,
         variationId: variationId
       });

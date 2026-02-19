@@ -16,11 +16,10 @@ const orderSchema = new mongoose.Schema(
           type: Number,
           default: 1,
         },
-        color: {
-          type: String,
-        },
-        size: {
-          type: String,
+        // Dynamic variation options (e.g., { "Color": "Black", "Storage": "128GB" })
+        variationOptions: {
+          type: Map,
+          of: String,
         },
         price: {
           type: Number,

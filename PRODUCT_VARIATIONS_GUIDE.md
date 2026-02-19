@@ -1,5 +1,21 @@
 # Product Variations Frontend Implementation Guide
 
+## ⚠️ BREAKING CHANGES - New Dynamic Variation System
+
+**Date:** February 2026
+
+The variation system now supports **dynamic attributes** for all product types!
+
+**What Changed:**
+- Request/response format changed from `color, size` to `variationOptions: { key: value }`
+- Frontend must handle dynamic attribute names (not hardcoded)
+- Cart and order APIs now use `variationOptions` Map
+- Each variation has mandatory price field
+
+**Action Required:** Update your frontend to use the new dynamic structure shown below.
+
+---
+
 ## Overview
 Product variations allow products to have different combinations of colors and sizes, each with their own stock levels, prices, and availability. This guide will help you implement this feature in your frontend application.
 
@@ -20,32 +36,65 @@ GET /api/products/:productId/variations
   "status": "success",
   "data": {
     "hasVariations": true,
-    "colors": ["Red", "Blue", "Green"],
-    "sizes": ["S", "M", "L", "XL"],
-    "variations": [
-      {
-        "_id": "variation_id",
-        "color": "Red",
-        "size": "M",
-        "sku": "PROD-001-RED-M",
-        "price": 29.99,
-        "discountPercentage": 10,
-        "priceAfterDiscount": 27,
-        "quantity": 50,
-        "reservedStock": 5,
-        "lowStockThreshold": 5,
-        "isLowStock": false,
-        "image": "https://...",
-        "isActive": true
-      }
-    ]
+    "variations": {
+      "axes": ["Color", "Size"],
+      "items": [
+        {
+          "_id": "variation_id",
+          "sku": "PROD-001-RED-M",
+          "options": {
+            "Color": "Red",
+            "Size": "M"
+          },
+          "price": 29.99,
+          "discountPercentage": 10,
+          "priceAfterDiscount": 27,
+          "quantity": 50,
+          "reservedStock": 5,
+          "lowStockThreshold": 5,
+          "isLowStock": false,
+          "image": "https://...",
+          "isActive": true
+        }
+      ]
+    }
   }
 }
 ```
 
 #### 2. Check Variation Stock Availability
+
+**Method 1: GET (Simple)**
 ```http
-GET /api/products/:productId/variations/check-stock?color=Red&size=M&quantity=2
+GET /api/products/:productId/variations/check-stock?variationOptions={"Color":"Red","Size":"M"}&quantity=2
+```
+
+**Method 2: POST (Recommended for complex options)**
+```http
+POST /api/products/:productId/variations/check-stock
+Content-Type: application/json
+
+{
+  "variationOptions": {
+    "Color": "Red",
+    "Size": "M"
+  },
+  "quantity": 2
+}
+```
+
+**Example for Phone:**
+```http
+POST /api/products/:productId/variations/check-stock
+
+{
+  "variationOptions": {
+    "Color": "Black",
+    "Storage": "256GB",
+    "RAM": "12GB"
+  },
+  "quantity": 1
+}
 ```
 
 **Response:**
@@ -53,44 +102,118 @@ GET /api/products/:productId/variations/check-stock?color=Red&size=M&quantity=2
 {
   "status": "success",
   "data": {
-    "color": "Red",
-    "size": "M",
+    "options": {
+      "Color": "Red",
+      "Size": "M"
+    },
     "availableStock": 45,
     "requestedQuantity": 2,
     "inStock": true,
     "isActive": true,
-    "price": 27
+    "price": 27,
+    "priceAfterDiscount": 24.30
   }
 }
 ```
+
+#### 3. Get Available Options (Smart Filtering - Amazon Style)
+
+**Purpose:** Progressive attribute selection. Show only available options based on what user already selected.
+
+```http
+POST /api/products/:productId/variations/available-options
+Content-Type: application/json
+
+{
+  "selectedOptions": {
+    "Color": "Red"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "availableOptions": {
+      "Size": ["S", "M", "L", "XL"]
+    },
+    "matchingVariations": [
+      {
+        "_id": "65f8b001",
+        "options": {
+          "Color": "Red",
+          "Size": "S"
+        },
+        "price": 255,
+        "priceAfterDiscount": 217,
+        "quantity": 20,
+        "isLowStock": false
+      },
+      {
+        "_id": "65f8b002",
+        "options": {
+          "Color": "Red",
+          "Size": "M"
+        },
+        "price": 255,
+        "priceAfterDiscount": 217,
+        "quantity": 50,
+        "isLowStock": false
+      }
+      // ... more Red variations
+    ]
+  }
+}
+```
+
+**Use Cases:**
+- User selects Color → Show available Sizes for that Color
+- User selects Color + Storage → Show available RAM options
+- Works with any number of attributes
 
 ---
 
 ### **Seller Endpoints (Requires Authentication as Seller)**
 
-#### 3. Create Product with Variations (Single Step)
+#### 4. Create Product with Variations (Single Step)
 ```http
 POST /api/products/seller
 Authorization: Bearer <token>
 ```
 
-**Request Body (Product + Bulk Variations):**
+**Request Body (Product + Dynamic Variations):**
 ```json
 {
   "title": "Premium Cotton T-Shirt",
   "slug": "premium-cotton-tshirt",
   "sku": "TSHIRT-001",
   "description": "High-quality cotton t-shirt",
-  "price": 299.99,
-  "discountPercentage": 15,
   "imageCover": "https://...",
   "category": "category_id",
   "status": "published",
   "variationData": {
-    "colors": ["Red", "Blue", "Black"],
-    "sizes": ["S", "M", "L", "XL"],
-    "defaultQuantity": 20,
-    "defaultLowStockThreshold": 5
+    "axes": ["Color", "Size"],
+    "items": [
+      {
+        "options": { "Color": "Red", "Size": "S" },
+        "price": 255,
+        "discountPercentage": 15,
+        "quantity": 20
+      },
+      {
+        "options": { "Color": "Red", "Size": "M" },
+        "price": 255,
+        "quantity": 20
+      },
+      {
+        "options": { "Color": "Blue", "Size": "S" },
+        "price": 255,
+        "quantity": 20
+      }
+      // ... more combinations
+    ]
   }
 }
 ```
@@ -101,8 +224,13 @@ Authorization: Bearer <token>
   "status": "success",
   "message": "Product created with 12 variations",
   "data": {
-    "product": { /* full product with variations */ },
-    "addedVariations": ["Red - S", "Red - M", ...]
+    "product": { /* full product object */ },
+    "addedVariations": [
+      "Color: Red, Size: S",
+      "Color: Red, Size: M",
+      "Color: Blue, Size: S"
+      // ...
+    ]
   }
 }
 ```
@@ -113,13 +241,14 @@ POST /api/products/:productId/variations
 Authorization: Bearer <token>
 ```
 
-**Request Body:**
+**Request Body (Dynamic Attributes):**
 ```json
 {
-  "color": "Red",
-  "size": "M",
-  "sku": "PROD-001-RED-M",  // Optional - auto-generated if not provided
-  "price": 29.99,            // Optional - uses product price if not provided
+  "options": {
+    "Color": "Red",
+    "Size": "M"
+  },
+  "price": 29.99,            // Required - no inheritance from product
   "discountPercentage": 10,  // Optional
   "quantity": 50,
   "lowStockThreshold": 5,
@@ -127,24 +256,21 @@ Authorization: Bearer <token>
 }
 ```
 
-#### 5. Bulk Add Variations (Creates all combinations)
-```http
-POST /api/products/:productId/variations/bulk
-Authorization: Bearer <token>
-```
-
-**Request Body:**
+**Example for Electronics:**
 ```json
 {
-  "colors": ["Red", "Blue", "Green"],
-  "sizes": ["S", "M", "L", "XL"],
-  "defaultPrice": 29.99,        // Optional
-  "defaultQuantity": 20,        // Optional - defaults to 0
-  "defaultLowStockThreshold": 5 // Optional - defaults to 5
+  "options": {
+    "Storage": "512GB",
+    "Color": "Midnight"
+  },
+  "price": 1299,
+  "quantity": 25
 }
 ```
 
-This creates all combinations (e.g., Red-S, Red-M, Red-L, Red-XL, Blue-S, etc.)
+#### 5. Bulk Add Variations (**DEPRECATED**)
+
+**⚠️ Old Endpoint:** This is being phased out. Use single-step product creation (endpoint #3) instead.
 
 #### 6. Update Variation
 ```http
@@ -195,7 +321,7 @@ Authorization: Bearer <token>
 
 ## Frontend Implementation Examples
 
-### **1. Product Page with Variation Selection**
+### **1. Product Page with Dynamic Variation Selection**
 
 ```jsx
 import React, { useState, useEffect } from 'react';
@@ -204,8 +330,7 @@ import axios from 'axios';
 const ProductPage = ({ productId }) => {
   const [product, setProduct] = useState(null);
   const [variations, setVariations] = useState(null);
-  const [selectedColor, setSelectedColor] = useState('');
-  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedOptions, setSelectedOptions] = useState({}); // Dynamic options object
   const [selectedVariation, setSelectedVariation] = useState(null);
   const [stockInfo, setStockInfo] = useState(null);
 
@@ -220,12 +345,18 @@ const ProductPage = ({ productId }) => {
         const variationsResponse = await axios.get(`/api/products/${productId}/variations`);
         setVariations(variationsResponse.data.data);
         
-        // Set default selections
-        if (variationsResponse.data.data.colors.length > 0) {
-          setSelectedColor(variationsResponse.data.data.colors[0]);
-        }
-        if (variationsResponse.data.data.sizes.length > 0) {
-          setSelectedSize(variationsResponse.data.data.sizes[0]);
+        // Set default selections for first axis if available
+        if (variationsResponse.data.data.variations?.axes?.length > 0) {
+          const firstAxisName = variationsResponse.data.data.variations.axes[0];
+          const firstItem = variationsResponse.data.data.variations.items[0];
+          if (firstItem) {
+            // Initialize with first variation's options
+            const initialOptions = {};
+            firstItem.options.forEach((value, key) => {
+              initialOptions[key] = value;
+            });
+            setSelectedOptions(initialOptions);
+          }
         }
       } catch (error) {
         console.error('Error fetching product:', error);
@@ -236,28 +367,35 @@ const ProductPage = ({ productId }) => {
   }, [productId]);
 
   useEffect(() => {
-    // Find selected variation when color or size changes
-    if (selectedColor && selectedSize && variations) {
-      const variation = variations.variations.find(
-        v => v.color === selectedColor && v.size === selectedSize
-      );
+    // Find selected variation when options change
+    if (Object.keys(selectedOptions).length > 0 && variations) {
+      const variation = variations.variations.items.find(item => {
+        // Compare all options
+        for (const [key, value] of Object.entries(selectedOptions)) {
+          if (item.options.get(key) !== value) {
+            return false;
+          }
+        }
+        return true;
+      });
       setSelectedVariation(variation);
       
       // Check stock availability
-      checkStock();
+      if (variation) {
+        checkStock();
+      }
     }
-  }, [selectedColor, selectedSize, variations]);
+  }, [selectedOptions, variations]);
 
   const checkStock = async () => {
-    if (!selectedColor || !selectedSize) return;
+    if (Object.keys(selectedOptions).length === 0) return;
     
     try {
       const response = await axios.get(
         `/api/products/${productId}/variations/check-stock`,
         {
           params: {
-            color: selectedColor,
-            size: selectedSize,
+            variationOptions: JSON.stringify(selectedOptions),
             quantity: 1
           }
         }
@@ -278,8 +416,7 @@ const ProductPage = ({ productId }) => {
       await axios.post('/api/cart', {
         productId: product._id,
         quantity: 1,
-        color: selectedColor,
-        size: selectedSize,
+        variationOptions: selectedOptions,
         variationId: selectedVariation._id
       }, {
         headers: {
@@ -307,47 +444,51 @@ const ProductPage = ({ productId }) => {
       <div className="product-info">
         <h1>{product.title}</h1>
         <p className="price">
-          {selectedVariation?.priceAfterDiscount || product.priceAfterDiscount} EGP
+          {selectedVariation?.priceAfterDiscount || selectedVariation?.price} EGP
           {selectedVariation?.discountPercentage > 0 && (
             <span className="original-price">
-              {selectedVariation?.price || product.price} EGP
+              {selectedVariation?.price} EGP
             </span>
           )}
         </p>
 
-        {variations.hasVariations && (
+        {variations.hasVariations && variations.variations?.axes && (
           <>
-            {/* Color Selection */}
-            <div className="color-selection">
-              <label>Color:</label>
-              <div className="color-options">
-                {variations.colors.map(color => (
-                  <button
-                    key={color}
-                    className={`color-btn ${selectedColor === color ? 'active' : ''}`}
-                    onClick={() => setSelectedColor(color)}
-                  >
-                    {color}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Dynamic Attribute Selection */}
+            {variations.variations.axes.map(axisName => {
+              // Get unique values for this axis from all variations
+              const uniqueValues = [
+                ...new Set(
+                  variations.variations.items
+                    .map(item => item.options.get(axisName))
+                    .filter(Boolean)
+                )
+              ];
 
-            {/* Size Selection */}
-            <div className="size-selection">
-              <label>Size:</label>
-              <div className="size-options">
-                {variations.sizes.map(size => (
-                  <button
-                    key={size}
-                    className={`size-btn ${selectedSize === size ? 'active' : ''}`}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
+              return (
+                <div key={axisName} className="attribute-selection">
+                  <label>{axisName}:</label>
+                  <div className="attribute-options">
+                    {uniqueValues.map(value => (
+                      <button
+                        key={value}
+                        className={`attribute-btn ${
+                          selectedOptions[axisName] === value ? 'active' : ''
+                        }`}
+                        onClick={() => 
+                          setSelectedOptions(prev => ({
+                            ...prev,
+                            [axisName]: value
+                          }))
+                        }
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
 
             {/* Stock Information */}
             {stockInfo && (
@@ -713,31 +854,322 @@ export default LowStockAlerts;
 
 ---
 
+### **5. Smart Filtering Product Page (Amazon-Style UX) 🚀**
+
+**Progressive attribute selection - show only available options as user selects.**
+
+```jsx
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const SmartFilterProductPage = ({ productId }) => {
+  const [product, setProduct] = useState(null);
+  const [axes, setAxes] = useState([]); // ["Color", "Size"]
+  const [selectedOptions, setSelectedOptions] = useState({}); // { Color: "Red" }
+  const [availableOptions, setAvailableOptions] = useState({}); // Smart filtered options
+  const [matchingVariations, setMatchingVariations] = useState([]);
+  const [finalVariation, setFinalVariation] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProductWithVariations();
+  }, [productId]);
+
+  const fetchProductWithVariations = async () => {
+    try {
+      const response = await axios.get(`/api/products/${productId}/variations`);
+      const data = response.data.data;
+      
+      setProduct(response.data.data.product);
+      
+      if (data.variations?.axes) {
+        setAxes(data.variations.axes);
+        
+        // Initialize availableOptions with all unique values for first axis
+        const firstAxis = data.variations.axes[0];
+        const availableFirstAxisValues = data.variations.availableOptionsByAxis[firstAxis];
+        
+        setAvailableOptions({
+          [firstAxis]: availableFirstAxisValues
+        });
+      }
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      setLoading(false);
+    }
+  };
+
+  // Fetch available options when user selects an attribute
+  useEffect(() => {
+    if (Object.keys(selectedOptions).length > 0) {
+      fetchAvailableOptions();
+    }
+  }, [selectedOptions]);
+
+  const fetchAvailableOptions = async () => {
+    try {
+      const response = await axios.post(
+        `/api/products/${productId}/variations/available-options`,
+        { selectedOptions }
+      );
+      
+      const data = response.data.data;
+      setAvailableOptions(data.availableOptions);
+      setMatchingVariations(data.matchingVariations);
+      
+      // If all attributes selected, set final variation
+      if (Object.keys(selectedOptions).length === axes.length) {
+        setFinalVariation(data.matchingVariations[0] || null);
+      } else {
+        setFinalVariation(null);
+      }
+    } catch (error) {
+      console.error('Error fetching available options:', error);
+    }
+  };
+
+  const handleSelectOption = (axisName, value) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [axisName]: value
+    }));
+  };
+
+  const handleAddToCart = async () => {
+    if (!finalVariation) {
+      alert('Please select all options');
+      return;
+    }
+
+    try {
+      await axios.post('/api/cart', {
+        productId: product._id,
+        quantity: 1,
+        variationOptions: selectedOptions,
+        variationId: finalVariation._id
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      alert('Added to cart!');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add to cart');
+    }
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (!product) return <div>Product not found</div>;
+
+  return (
+    <div className="smart-filter-product-page">
+      <div className="product-image">
+        <img 
+          src={finalVariation?.image || product.imageCover} 
+          alt={product.title} 
+        />
+      </div>
+
+      <div className="product-details">
+        <h1>{product.title}</h1>
+        
+        {/* Display price */}
+        {finalVariation ? (
+          <div className="price">
+            <span className="current-price">
+              {finalVariation.priceAfterDiscount || finalVariation.price} EGP
+            </span>
+            {finalVariation.discountPercentage > 0 && (
+              <span className="original-price">
+                {finalVariation.price} EGP
+              </span>
+            )}
+          </div>
+        ) : (
+          <p className="select-prompt">Select options to see price</p>
+        )}
+
+        {/* Progressive attribute selection */}
+        <div className="attribute-selection">
+          {axes.map((axisName, index) => {
+            const isSelected = selectedOptions[axisName] !== undefined;
+            const isPreviousSelected = index === 0 || selectedOptions[axes[index - 1]] !== undefined;
+            const options = availableOptions[axisName] || [];
+
+            return (
+              <div 
+                key={axisName} 
+                className={`attribute-group ${!isPreviousSelected ? 'disabled' : ''}`}
+              >
+                <label>
+                  {axisName}: 
+                  {isSelected && <strong> {selectedOptions[axisName]}</strong>}
+                </label>
+                
+                {isPreviousSelected && (
+                  <div className="options-grid">
+                    {options.map(value => (
+                      <button
+                        key={value}
+                        className={`option-btn ${
+                          selectedOptions[axisName] === value ? 'selected' : ''
+                        }`}
+                        onClick={() => handleSelectOption(axisName, value)}
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {!isPreviousSelected && (
+                  <p className="help-text">
+                    Select {axes[index - 1]} first
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Stock status */}
+        {finalVariation && (
+          <div className="stock-status">
+            {finalVariation.quantity > 0 ? (
+              <p className="in-stock">
+                ✓ In Stock ({finalVariation.quantity} available)
+                {finalVariation.isLowStock && <span className="low-stock-badge">Low Stock!</span>}
+              </p>
+            ) : (
+              <p className="out-of-stock">✗ Out of Stock</p>
+            )}
+          </div>
+        )}
+
+        {/* Matching variations preview (when not all selected) */}
+        {!finalVariation && matchingVariations.length > 0 && (
+          <div className="matching-preview">
+            <p>{matchingVariations.length} options available</p>
+            <div className="price-range">
+              Price range: {Math.min(...matchingVariations.map(v => v.priceAfterDiscount || v.price))} - 
+              {Math.max(...matchingVariations.map(v => v.priceAfterDiscount || v.price))} EGP
+            </div>
+          </div>
+        )}
+
+        {/* Add to cart button */}
+        <button 
+          className="add-to-cart-btn"
+          onClick={handleAddToCart}
+          disabled={!finalVariation || finalVariation.quantity === 0}
+        >
+          {finalVariation 
+            ? (finalVariation.quantity > 0 ? 'Add to Cart' : 'Out of Stock')
+            : 'Select All Options'
+          }
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default SmartFilterProductPage;
+```
+
+**How It Works:**
+
+1. **Initial Load**: Shows all available values for first attribute (e.g., all Colors)
+2. **User Selects Color**: Calls `available-options` API → Shows only Sizes available in that Color
+3. **User Selects Size**: Shows final variation with exact price, stock, image
+4. **Progressive Disclosure**: Next attribute options appear only after previous selection
+
+**Benefits:**
+✅ No overwhelming dropdowns with 50+ combinations
+✅ Always shows only available options (no "Out of Stock" selections)
+✅ Works with any number of attributes (2, 3, 4+)
+✅ Shows price range before final selection
+✅ Clear visual feedback on selection progress
+
+---
+
 ## Database Schema
 
-The product variations are stored in the Product model:
+The product variations are stored in the Product model with a dynamic structure:
 
 ```javascript
 {
   hasVariations: Boolean,
-  colors: [String],           // Available colors
-  sizes: [String],            // Available sizes
-  variations: [
-    {
-      color: String,
-      size: String,
-      sku: String,
-      price: Number,
-      discountPercentage: Number,
-      priceAfterDiscount: Number,
-      quantity: Number,
-      reservedStock: Number,
-      lowStockThreshold: Number,
-      isLowStock: Boolean,
-      image: String,
-      isActive: Boolean
-    }
-  ]
+  
+  variations: {
+    // Dynamic axes - can be any attributes (Color, Size, Storage, Material, etc.)
+    axes: [String],  // Example: ["Color", "Storage"] or ["Material", "Finish"]
+    
+    // Variation items
+    items: [
+      {
+        sku: String,
+        
+        // Dynamic options as Map (key-value pairs)
+        options: Map<String, String>,  // Example: { "Color": "Red", "Size": "M" }
+        
+        price: Number,              // Required - no inheritance from product
+        discountPercentage: Number,
+        priceAfterDiscount: Number,
+        quantity: Number,
+        reservedStock: Number,
+        lowStockThreshold: Number,
+        isLowStock: Boolean,
+        image: String,
+        isActive: Boolean
+      }
+    ]
+  }
+}
+```
+
+**Examples of Different Product Types:**
+
+```javascript
+// Clothing Product
+{
+  "variations": {
+    "axes": ["Color", "Size"],
+    "items": [
+      {
+        "options": { "Color": "Red", "Size": "M" },
+        "price": 29.99
+      }
+    ]
+  }
+}
+
+// Electronics Product
+{
+  "variations": {
+    "axes": ["Storage", "Color"],
+    "items": [
+      {
+        "options": { "Storage": "256GB", "Color": "Black" },
+        "price": 999
+      }
+    ]
+  }
+}
+
+// Furniture Product
+{
+  "variations": {
+    "axes": ["Material", "Finish", "Size"],
+    "items": [
+      {
+        "options": { "Material": "Oak", "Finish": "Natural", "Size": "Large" },
+        "price": 599
+      }
+    ]
+  }
 }
 ```
 
@@ -746,11 +1178,13 @@ The product variations are stored in the Product model:
 ## Important Notes
 
 1. **Stock Management**: Each variation has its own stock (`quantity`) and `reservedStock` (for pending orders)
-2. **Pricing**: Variations can have their own prices or inherit from the main product
-3. **Images**: Each variation can have its own image or use the product's cover image
-4. **SKU**: Auto-generated as `{PRODUCT_SKU}-{COLOR}-{SIZE}` if not provided
-5. **Low Stock**: Each variation has its own low stock threshold and tracking
-6. **Active Status**: Variations can be deactivated without deleting them
+2. **Pricing**: Each variation MUST have its own price (no inheritance from product) - prevents double-discount issues
+3. **Dynamic Attributes**: Use any attribute names - not limited to color/size (Storage, RAM, Material, Finish, etc.)
+4. **Images**: Each variation can have its own image or use the product's cover image
+5. **SKU**: Auto-generated from all option values if not provided (e.g., `PROD-001-RED-M` or `PHONE-BLACK-256GB`)
+6. **Low Stock**: Each variation has its own low stock threshold and tracking
+7. **Active Status**: Variations can be deactivated without deleting them
+8. **Map Storage**: Options are stored as MongoDB Map for efficient querying
 
 ---
 

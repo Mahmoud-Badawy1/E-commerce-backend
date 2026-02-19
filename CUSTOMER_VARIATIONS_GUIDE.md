@@ -1,7 +1,23 @@
 # Product Variations - Customer Guide
 
+## ⚠️ NEW FEATURE - Dynamic Variations Across All Categories! 
+
+**Date:** February 2026
+
+**What's New:**
+- 🎉 Shop ANY product type with custom variations
+- 📱 Phones: Storage + Color options
+- 💻 Laptops: RAM + Storage + GPU combinations
+- 🪑 Furniture: Material + Finish choices  
+- 👕 Clothing: Color + Size variations
+- ✨ Each variation has its own price (no confusing double discounts!)
+
+---
+
 ## Overview
-As a customer, you can now shop for products with different variations (colors, sizes) and check their availability before purchasing.
+As a customer, you can shop for products with dynamic variations (color, size, storage, material, or any other attributes) and check their availability before purchasing.
+
+**✨ New Feature:** Our variation system now supports ANY product attributes - not just colors and sizes! Shop for phones with storage options, furniture with materials, laptops with specs, and more.
 
 ---
 
@@ -27,9 +43,6 @@ GET /api/products/65f8a1234567890abcdef123
     "_id": "65f8a1234567890abcdef123",
     "title": "Premium Cotton T-Shirt",
     "description": "High-quality 100% cotton t-shirt with modern fit",
-    "price": 299.99,
-    "discountPercentage": 15,
-    "priceAfterDiscount": 255,
     "imageCover": "https://cloudinary.com/.../tshirt-cover.jpg",
     "images": [
       "https://cloudinary.com/.../tshirt-1.jpg",
@@ -39,8 +52,25 @@ GET /api/products/65f8a1234567890abcdef123
       "name": "Men's Clothing"
     },
     "hasVariations": true,
-    "colors": ["Red", "Blue", "Black", "White"],
-    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "variations": {
+      "axes": ["Color", "Size"],
+      "items": [
+        {
+          "_id": "variation_id",
+          "sku": "TSHIRT-001-RED-M",
+          "options": {
+            "Color": "Red",
+            "Size": "M"
+          },
+          "price": 255,
+          "discountPercentage": 15,
+          "priceAfterDiscount": 217,
+          "quantity": 50,
+          "isActive": true
+        }
+        // ... more variations
+      ]
+    },
     "ratingsAverage": 4.5,
     "ratingsQuantity": 128,
     "status": "published"
@@ -62,58 +92,72 @@ GET /api/products/:productId/variations
 GET /api/products/65f8a1234567890abcdef123/variations
 ```
 
-**Response Example:**
+**Response Example (Enhanced with Smart Filtering):**
 ```json
 {
   "status": "success",
   "data": {
     "hasVariations": true,
-    "colors": ["Red", "Blue", "Black", "White"],
-    "sizes": ["S", "M", "L", "XL", "XXL"],
-    "variations": [
-      {
-        "_id": "65f8b9876543210fedcba001",
-        "color": "Red",
-        "size": "M",
-        "sku": "TSHIRT-001-RED-M",
-        "price": 299.99,
-        "discountPercentage": 15,
-        "priceAfterDiscount": 255,
-        "quantity": 50,
-        "reservedStock": 5,
-        "lowStockThreshold": 10,
-        "isLowStock": false,
-        "image": "https://cloudinary.com/.../tshirt-red.jpg",
-        "isActive": true
+    "variations": {
+      "axes": ["Color", "Size"],
+      "availableOptionsByAxis": {
+        "Color": ["Red", "Blue", "Black", "White"],
+        "Size": ["S", "M", "L", "XL"]
       },
-      {
-        "_id": "65f8b9876543210fedcba002",
-        "color": "Red",
-        "size": "L",
-        "sku": "TSHIRT-001-RED-L",
-        "price": 299.99,
-        "discountPercentage": 15,
-        "priceAfterDiscount": 255,
-        "quantity": 75,
-        "reservedStock": 3,
-        "lowStockThreshold": 10,
-        "isLowStock": false,
-        "image": "https://cloudinary.com/.../tshirt-red.jpg",
-        "isActive": true
+      "matrix": {
+        "Red": ["S", "M", "L", "XL"],
+        "Blue": ["M", "L", "XL"],
+        "Black": ["S", "M", "L"],
+        "White": ["L", "XL"]
       },
-      {
-        "_id": "65f8b9876543210fedcba003",
-        "color": "Blue",
-        "size": "M",
-        "sku": "TSHIRT-001-BLUE-M",
-        "price": 299.99,
-        "discountPercentage": 15,
-        "priceAfterDiscount": 255,
-        "quantity": 3,
-        "reservedStock": 0,
-        "lowStockThreshold": 10,
-        "isLowStock": true,
-        "image": "https://cloudinary.com/.../tshirt-blue.jpg",
+      "items": [
+        {
+          "_id": "65f8b9876543210fedcba001",
+          "sku": "TSHIRT-001-RED-M",
+          "options": {
+            "Color": "Red",
+            "Size": "M"
+          },
+          "price": 255,
+          "discountPercentage": 15,
+          "priceAfterDiscount": 217,
+          "quantity": 50,
+          "reservedStock": 5,
+          "lowStockThreshold": 10,
+          "isLowStock": false,
+          "image": "https://cloudinary.com/.../tshirt-red.jpg",
+          "isActive": true
+        },
+        {
+          "_id": "65f8b9876543210fedcba002",
+          "sku": "TSHIRT-001-RED-L",
+          "options": {
+            "Color": "Red",
+            "Size": "L"
+          },
+          "price": 255,
+          "discountPercentage": 15,
+          "priceAfterDiscount": 217,
+          "quantity": 75,
+          "reservedStock": 3,
+          "lowStockThreshold": 10,
+          "isLowStock": false,
+          "image": "https://cloudinary.com/.../tshirt-red.jpg",
+          "isActive": true
+        }
+        // ... more variations (only active + available stock)
+      ]
+    }
+  }
+}
+```
+
+**New Fields Explained:**
+- **availableOptionsByAxis**: All unique values per attribute (perfect for showing filter options)
+- **matrix**: Shows which second-axis values are available for each first-axis value
+  - Example: `"Red": ["S", "M", "L", "XL"]` means these sizes available in Red
+  - Enables Amazon-style progressive selection
+- **items**: Only active variations with available stock (no out-of-stock or inactive variations)
         "isActive": true
       },
       {
@@ -146,14 +190,41 @@ GET /api/products/65f8a1234567890abcdef123/variations
 
 ### 3. Check Stock for Specific Variation
 
-**Endpoint:**
+**Method 1: GET (Simple)**
 ```http
-GET /api/products/:productId/variations/check-stock?color={color}&size={size}&quantity={quantity}
+GET /api/products/:productId/variations/check-stock?variationOptions={"Color":"Red","Size":"M"}&quantity=2
 ```
 
-**Example Request:**
+**Method 2: POST (Recommended)**
+```http
+POST /api/products/:productId/variations/check-stock
+Content-Type: application/json
+
+{
+  "variationOptions": {
+    "Color": "Red",
+    "Size": "M"
+  },
+  "quantity": 2
+}
+```
+
+**Example Request (T-Shirt):**
 ```bash
-GET /api/products/65f8a1234567890abcdef123/variations/check-stock?color=Red&size=M&quantity=2
+GET /api/products/65f8a1234567890abcdef123/variations/check-stock?variationOptions={"Color":"Red","Size":"M"}&quantity=2
+```
+
+**Example Request (Phone):**
+```bash
+POST /api/products/65f8a1234567890abcdef123/variations/check-stock
+
+{
+  "variationOptions": {
+    "Color": "Black",
+    "Storage": "256GB"
+  },
+  "quantity": 1
+}
 ```
 
 **Response Example (In Stock):**
@@ -161,33 +232,263 @@ GET /api/products/65f8a1234567890abcdef123/variations/check-stock?color=Red&size
 {
   "status": "success",
   "data": {
-    "color": "Red",
-    "size": "M",
+    "options": {
+      "Color": "Red",
+      "Size": "M"
+    },
     "availableStock": 45,
     "requestedQuantity": 2,
     "inStock": true,
+    "isActive": true,
+    "price": 255,
+    "priceAfterDiscount": 217
+  }
+}
+```
+
+**Response Example (Out of Stock):**
+```json
+{
+  "status": "success",
+  "data": {
+    "options": {
+      "Color": "Black",
+      "Size": "XL"
+    },
+    "availableStock": 0,
+    "requestedQuantity": 1,
+    "inStock": false,
     "isActive": true,
     "price": 255
   }
 }
 ```
 
-**Response Example (Out of Stock):**
-```bash
-GET /api/products/65f8a1234567890abcdef123/variations/check-stock?color=Black&size=XL&quantity=1
+---
+
+### 4. Smart Filtering - Get Available Options (Amazon-Style) 🚀
+
+**Purpose:** Show only available options based on what customer has already selected.
+
+**Endpoint:**
+```http
+POST /api/products/:productId/variations/available-options
+Content-Type: application/json
+
+{
+  "selectedOptions": {
+    "Color": "Red"
+  }
+}
 ```
 
+**Example 1: Customer Selects Color First**
+
+**Request:**
+```json
+{
+  "selectedOptions": {
+    "Color": "Red"
+  }
+}
+```
+
+**Response:**
 ```json
 {
   "status": "success",
   "data": {
-    "color": "Black",
-    "size": "XL",
-    "availableStock": 0,
-    "requestedQuantity": 1,
-    "inStock": false,
-    "isActive": true,
-    "price": 255
+    "availableOptions": {
+      "Size": ["S", "M", "L", "XL"]
+    },
+    "matchingVariations": [
+      {
+        "_id": "65f8b001",
+        "options": {
+          "Color": "Red",
+          "Size": "S"
+        },
+        "price": 255,
+        "priceAfterDiscount": 217,
+        "quantity": 20,
+        "isLowStock": false
+      },
+      {
+        "_id": "65f8b002",
+        "options": {
+          "Color": "Red",
+          "Size": "M"
+        },
+        "price": 255,
+        "priceAfterDiscount": 217,
+        "quantity": 50,
+        "isLowStock": false
+      }
+      // ... more Red variations
+    ]
+  }
+}
+```
+
+**What This Means:**
+- Customer selected "Red"
+- Only sizes **S, M, L, XL** are available in Red
+- XXL is NOT shown because it's not available in Red
+- Customer can now pick from these 4 sizes only
+
+**Example 2: Customer Selects Both (Final Selection)**
+
+**Request:**
+```json
+{
+  "selectedOptions": {
+    "Color": "Red",
+    "Size": "M"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "availableOptions": {},
+    "matchingVariations": [
+      {
+        "_id": "65f8b002",
+        "options": {
+          "Color": "Red",
+          "Size": "M"
+        },
+        "price": 255,
+        "priceAfterDiscount": 217,
+        "quantity": 50,
+        "reservedStock": 5,
+        "isLowStock": false,
+        "image": "https://cloudinary.com/.../red-tshirt.jpg"
+      }
+    ]
+  }
+}
+```
+
+**Example 3: Phone with 3 Attributes**
+
+**Request (Customer selected Color only):**
+```json
+{
+  "selectedOptions": {
+    "Color": "Black"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "availableOptions": {
+      "Storage": ["128GB", "256GB", "512GB"],
+      "RAM": ["8GB", "12GB"]
+    },
+    "matchingVariations": [
+      // All Black phones with available stock
+    ]
+  }
+}
+```
+
+**Shopping Flow:**
+1. 🎨 Customer selects **Color: Red**
+2. ✅ System shows only available Sizes for Red (S, M, L, XL)
+3. 📏 Customer selects **Size: M**
+4. ✅ System shows final variation with exact price and stock
+5. 🛒 Customer adds to cart
+
+**Benefits for Customers:**
+- ✅ Never see "out of stock" options
+- ✅ No confusing long dropdown lists
+- ✅ Progressive disclosure (one choice at a time)
+- ✅ Clear price as you select
+- ✅ Works perfectly on mobile
+
+---
+
+## ✨ Examples for Different Product Types
+
+Our system supports ANY product category with custom attributes!
+
+### Clothing Example (Color + Size)
+```json
+{
+  "variations": {
+    "axes": ["Color", "Size"],
+    "items": [
+      {
+        "options": { "Color": "Navy", "Size": "L" },
+        "price": 299,
+        "quantity": 25
+      }
+    ]
+  }
+}
+```
+
+### Smartphone Example (Storage + Color)
+```json
+{
+  "variations": {
+    "axes": ["Storage", "Color"],
+    "items": [
+      {
+        "options": { "Storage": "128GB", "Color": "Black" },
+        "price": 999,
+        "quantity": 50
+      },
+      {
+        "options": { "Storage": "256GB", "Color": "White" },
+        "price": 1199,
+        "quantity": 30
+      }
+    ]
+  }
+}
+```
+
+### Laptop Example (RAM + Storage + GPU)
+```json
+{
+  "variations": {
+    "axes": ["RAM", "Storage", "GPU"],
+    "items": [
+      {
+        "options": {
+          "RAM": "16GB",
+          "Storage": "512GB SSD",
+          "GPU": "RTX 3060"
+        },
+        "price": 1299,
+        "quantity": 15
+      }
+    ]
+  }
+}
+```
+
+### Furniture Example (Material + Finish)
+```json
+{
+  "variations": {
+    "axes": ["Material", "Finish"],
+    "items": [
+      {
+        "options": { "Material": "Oak", "Finish": "Dark Stain" },
+        "price": 550,
+        "quantity": 8
+      }
+    ]
   }
 }
 ```
@@ -202,13 +503,27 @@ POST /api/cart
 Authorization: Bearer {token}
 ```
 
-**Request Body:**
+**Request Body (Dynamic Variations):**
 ```json
 {
   "productId": "65f8a1234567890abcdef123",
-  "color": "Red",
-  "size": "M",
+  "variationOptions": {
+    "Color": "Red",
+    "Size": "M"
+  },
   "variationId": "65f8b9876543210fedcba001"
+}
+```
+
+**Example for Phone:**
+```json
+{
+  "productId": "phone_product_id",
+  "variationOptions": {
+    "Storage": "256GB",
+    "Color": "Black"
+  },
+  "variationId": "variation_id"
 }
 ```
 
@@ -226,8 +541,10 @@ Authorization: Bearer {token}
         "_id": "65f8c2222222222222222222",
         "product": "65f8a1234567890abcdef123",
         "quantity": 1,
-        "color": "Red",
-        "size": "M",
+        "variationOptions": {
+          "Color": "Red",
+          "Size": "M"
+        },
         "price": 255,
         "variationId": "65f8b9876543210fedcba001"
       }
@@ -243,7 +560,7 @@ Authorization: Bearer {token}
 ```json
 {
   "status": "fail",
-  "message": "Variation Red - M is out of stock"
+  "message": "Variation {\\\"Color\\\":\\\"Red\\\",\\\"Size\\\":\\\"M\\\"} is out of stock"
 }
 ```
 

@@ -104,107 +104,65 @@ exports.createSellerProduct = asyncHandler(async (req, res, next) => {
   const product = await productModel.create(productData);
 
   // If variation data is provided, add variations
-  if (variationData) {
-    // Check if bulk add (colors and sizes arrays)
-    if (variationData.colors && variationData.sizes && Array.isArray(variationData.colors) && Array.isArray(variationData.sizes)) {
-      const colors = variationData.colors;
-      const sizes = variationData.sizes;
-      const defaultPrice = variationData.defaultPrice || product.price;
-      const defaultQuantity = variationData.defaultQuantity || 0;
-      const defaultLowStockThreshold = variationData.defaultLowStockThreshold || 5;
-
-      // Add colors and sizes to product
-      product.colors = [...new Set([...product.colors, ...colors])];
-      product.sizes = [...new Set([...product.sizes, ...sizes])];
-
-      // Create all combinations
-      const addedVariations = [];
-      for (const color of colors) {
-        for (const size of sizes) {
-          // Check if variation already exists
-          const existingVariation = product.variations.find(
-            (v) => v.color === color && v.size === size
-          );
-
-          if (!existingVariation) {
-            const sku = `${product.sku}-${color.toUpperCase().replace(/\s+/g, "-")}-${size.toUpperCase().replace(/\s+/g, "-")}`;
-            
-            product.variations.push({
-              color,
-              size,
-              sku,
-              price: defaultPrice,
-              discountPercentage: product.discountPercentage || 0,
-              quantity: defaultQuantity,
-              lowStockThreshold: defaultLowStockThreshold,
-              image: product.imageCover,
-              isActive: true,
-            });
-
-            addedVariations.push(`${color} - ${size}`);
-          }
-        }
-      }
-
-      product.hasVariations = true;
-      await product.save();
-
-      return res.status(201).json({
-        status: "success",
-        message: `Product created with ${addedVariations.length} variations`,
-        data: {
-          product,
-          addedVariations,
-        },
-      });
+  if (variationData && variationData.axes && variationData.items) {
+    // Set variation axes
+    product.variations.axes = variationData.axes;
+    
+    // Initialize items array if not exists
+    if (!product.variations.items) {
+      product.variations.items = [];
     }
 
-    // Check if single variation add
-    if (variationData.color && variationData.size) {
-      const { color, size, sku, price, discountPercentage, quantity, lowStockThreshold, image } = variationData;
+    // Add all variation items
+    const addedVariations = [];
+    for (const item of variationData.items) {
+      // Validate required fields
+      if (!item.options || !item.price) {
+        return next(new ApiError("Each variation must have options and price", 400));
+      }
 
-      // Check if variation already exists
-      const existingVariation = product.variations.find(
-        (v) => v.color === color && v.size === size
-      );
+      // Check if variation with same options already exists
+      const optionsObj = item.options;
+      const existingVariation = product.findVariation(optionsObj);
 
       if (existingVariation) {
-        return next(new ApiError(`Variation ${color} - ${size} already exists`, 400));
-      }
-
-      // Add color and size to product arrays
-      if (!product.colors.includes(color)) {
-        product.colors.push(color);
-      }
-      if (!product.sizes.includes(size)) {
-        product.sizes.push(size);
+        const optionsStr = JSON.stringify(optionsObj);
+        return next(new ApiError(`Variation ${optionsStr} already exists`, 400));
       }
 
       // Generate SKU if not provided
-      const variationSku = sku || `${product.sku}-${color.toUpperCase().replace(/\s+/g, "-")}-${size.toUpperCase().replace(/\s+/g, "-")}`;
+      const variationSku = item.sku || `${product.sku}-${Object.values(optionsObj).join("-").toUpperCase().replace(/\s+/g, "-")}`;
+
+      // Create options Map
+      const optionsMap = new Map(Object.entries(optionsObj));
 
       // Add variation
-      product.variations.push({
-        color,
-        size,
+      product.variations.items.push({
         sku: variationSku,
-        price: price || product.price,
-        discountPercentage: discountPercentage !== undefined ? discountPercentage : product.discountPercentage,
-        quantity: quantity || 0,
-        lowStockThreshold: lowStockThreshold || 5,
-        image: image || product.imageCover,
-        isActive: true,
+        options: optionsMap,
+        price: item.price,
+        discountPercentage: item.discountPercentage || 0,
+        quantity: item.quantity || 0,
+        lowStockThreshold: item.lowStockThreshold || 5,
+        image: item.image || product.imageCover,
+        isActive: item.isActive !== undefined ? item.isActive : true,
       });
 
-      product.hasVariations = true;
-      await product.save();
-
-      return res.status(201).json({
-        status: "success",
-        message: "Product created with variation",
-        data: product,
-      });
+      const optionsStr = Object.entries(optionsObj).map(([k, v]) => `${k}: ${v}`).join(", ");
+      addedVariations.push(optionsStr);
     }
+
+    product.hasVariations = true;
+    await product.save();
+
+    return res.status(201).json({
+      status: "success",
+      message: `Product created with ${addedVariations.length} variations`,
+      data: {
+        product,
+        addedVariations,
+      },
+    });
   }
 
   // No variations provided - return basic product

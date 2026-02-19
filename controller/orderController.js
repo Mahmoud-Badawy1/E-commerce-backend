@@ -127,8 +127,7 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
     items: cart.cartItems.map(item => ({
       product: item.product._id,
       quantity: item.quantity,
-      color: item.color,
-      size: item.size,
+      variationOptions: item.variationOptions,
       price: item.price,
       variationId: item.variationId,
       seller: item.product.seller
@@ -146,15 +145,17 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
       
       if (!product) continue;
       
-      if (product.hasVariations && item.variationId) {
+      if (product.hasVariations && item.variationOptions) {
         // Reserve stock for specific variation
-        const variation = product.variations.id(item.variationId);
+        const variationOptions = Object.fromEntries(item.variationOptions);
+        const variation = product.findVariation(variationOptions);
         if (variation) {
           const availableStock = variation.quantity - variation.reservedStock;
           if (availableStock < item.quantity) {
             // Rollback order if insufficient stock
             await orderModel.findByIdAndDelete(order._id);
-            throw new ApiError(`Insufficient stock for ${variation.color} - ${variation.size}`, 400);
+            const optionsStr = JSON.stringify(variationOptions);
+            throw new ApiError(`Insufficient stock for variation ${optionsStr}`, 400);
           }
           variation.reservedStock += item.quantity;
         }
@@ -209,8 +210,7 @@ const createCreditOrder = async (paymentData) => {
     items: cart.cartItems.map(item => ({
       product: item.product._id,
       quantity: item.quantity,
-      color: item.color,
-      size: item.size,
+      variationOptions: item.variationOptions,
       price: item.price,
       variationId: item.variationId,
       seller: item.product.seller
@@ -232,9 +232,10 @@ const createCreditOrder = async (paymentData) => {
       
       if (!product) continue;
       
-      if (product.hasVariations && item.variationId) {
+      if (product.hasVariations && item.variationOptions) {
         // Update specific variation stock
-        const variation = product.variations.id(item.variationId);
+        const variationOptions = Object.fromEntries(item.variationOptions);
+        const variation = product.findVariation(variationOptions);
         if (variation) {
           variation.quantity -= item.quantity;
         }
