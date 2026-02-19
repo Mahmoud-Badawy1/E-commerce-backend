@@ -1,6 +1,5 @@
 const controllerHandler = require("./controllerHandler");
 const productModel = require("../models/productModel");
-const sellerModel = require("../models/sellerModel");
 const asyncHandler = require("express-async-handler");
 const ApiError = require("../utils/apiError");
 const ApiFeatures = require("../utils/apiFeatures");
@@ -113,16 +112,10 @@ exports.uploadProductImagesById = asyncHandler(async (req, res, next) => {
 exports.uploadSellerProductImages = asyncHandler(async (req, res, next) => {
   const productId = req.params.id;
   
-  // Find seller
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   // Find product and check ownership
   const product = await productModel.findOne({
     _id: productId,
-    seller: seller._id,
+    seller: req.user._id,
   });
 
   if (!product) {
@@ -189,14 +182,7 @@ exports.deleteProduct = controllerHandler.delete(productModel);
 
 // Seller-specific controllers
 exports.getSellerProducts = asyncHandler(async (req, res, next) => {
-  console.log(req.user);
-  
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
-  const filter = { seller: seller._id };
+  const filter = { seller: req.user._id };
   const documentsCount = await productModel.countDocuments(filter);
   const apiFeatures = new ApiFeatures(productModel.find(filter), req.query)
     .filter()
@@ -216,12 +202,7 @@ exports.getSellerProducts = asyncHandler(async (req, res, next) => {
 });
 
 exports.createSellerProduct = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
-  req.body.seller = seller._id;
+  req.body.seller = req.user._id;
 
   // Note: Images sent during creation are ignored
   // Use POST /api/products/seller/:id/upload-images after product creation
@@ -299,14 +280,9 @@ exports.createSellerProduct = asyncHandler(async (req, res, next) => {
 });
 
 exports.getSellerProduct = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   const product = await productModel.findOne({
     _id: req.params.id,
-    seller: seller._id,
+    seller: req.user._id,
   });
 
   if (!product) {
@@ -317,13 +293,8 @@ exports.getSellerProduct = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateSellerProduct = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   const product = await productModel.findOneAndUpdate(
-    { _id: req.params.id, seller: seller._id },
+    { _id: req.params.id, seller: req.user._id },
     req.body,
     { new: true, runValidators: true }
   );
@@ -336,14 +307,9 @@ exports.updateSellerProduct = asyncHandler(async (req, res, next) => {
 });
 
 exports.deleteSellerProduct = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   const product = await productModel.findOneAndDelete({
     _id: req.params.id,
-    seller: seller._id,
+    seller: req.user._id,
   });
 
   if (!product) {
@@ -355,11 +321,6 @@ exports.deleteSellerProduct = asyncHandler(async (req, res, next) => {
 
 // Bulk import products from CSV
 exports.bulkImportProducts = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   const { products } = req.body;
   if (!Array.isArray(products) || products.length === 0) {
     return next(new ApiError("Products array is required and cannot be empty", 400));
@@ -390,7 +351,7 @@ exports.bulkImportProducts = asyncHandler(async (req, res, next) => {
         let uniqueSku = false;
         let attempt = 0;
         while (!uniqueSku && attempt < 5) {
-          const generateSku = `${seller._id.toString().slice(-8)}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          const generateSku = `${req.user._id.toString().slice(-8)}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
           const existingSku = await productModel.findOne({ sku: generateSku });
           if (!existingSku) {
             sku = generateSku;
@@ -400,7 +361,7 @@ exports.bulkImportProducts = asyncHandler(async (req, res, next) => {
         }
         if (!sku) {
           // Fallback: use timestamp with high precision
-          sku = `${seller._id.toString().slice(-8)}-${Date.now()}-${process.hrtime().toString()}`;
+          sku = `${req.user._id.toString().slice(-8)}-${Date.now()}-${process.hrtime().toString()}`;
         }
       }
       
@@ -408,7 +369,7 @@ exports.bulkImportProducts = asyncHandler(async (req, res, next) => {
         ...product,
         slug,
         sku,
-        seller: seller._id,
+        seller: req.user._id,
         status: product.status || "published",
         variants: product.variants || [],
       });

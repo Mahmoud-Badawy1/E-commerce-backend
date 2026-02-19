@@ -78,7 +78,7 @@ const productSchema = new mongoose.Schema(
     },
     seller: {
       type: mongoose.Schema.ObjectId,
-      ref: "Seller",
+      ref: "User",
     },
     ratingsAverage: {
       type: Number,

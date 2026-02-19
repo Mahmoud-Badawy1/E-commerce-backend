@@ -1,7 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const ApiError = require("../utils/apiError");
 const productModel = require("../models/productModel");
-const sellerModel = require("../models/sellerModel");
 
 // @desc    Add variation to product
 // @route   POST /products/:productId/variations
@@ -10,14 +9,8 @@ exports.addVariation = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
   const { color, size, sku, price, discountPercentage, quantity, lowStockThreshold, image } = req.body;
 
-  // Get seller
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   // Get product and verify ownership
-  const product = await productModel.findOne({ _id: productId, seller: seller._id });
+  const product = await productModel.findOne({ _id: productId, seller: req.user._id });
   if (!product) {
     return next(new ApiError("Product not found or not owned by you", 404));
   }
@@ -142,14 +135,8 @@ exports.getProductVariations = asyncHandler(async (req, res, next) => {
 exports.updateVariation = asyncHandler(async (req, res, next) => {
   const { productId, variationId } = req.params;
 
-  // Get seller
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   // Get product and verify ownership
-  const product = await productModel.findOne({ _id: productId, seller: seller._id });
+  const product = await productModel.findOne({ _id: productId, seller: req.user._id });
   if (!product) {
     return next(new ApiError("Product not found or not owned by you", 404));
   }
@@ -183,14 +170,8 @@ exports.updateVariation = asyncHandler(async (req, res, next) => {
 exports.deleteVariation = asyncHandler(async (req, res, next) => {
   const { productId, variationId } = req.params;
 
-  // Get seller
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   // Get product and verify ownership
-  const product = await productModel.findOne({ _id: productId, seller: seller._id });
+  const product = await productModel.findOne({ _id: productId, seller: req.user._id });
   if (!product) {
     return next(new ApiError("Product not found or not owned by you", 404));
   }
@@ -225,14 +206,8 @@ exports.adjustVariationStock = asyncHandler(async (req, res, next) => {
   const { productId, variationId } = req.params;
   const { quantity, type, notes } = req.body;
 
-  // Get seller
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   // Get product and verify ownership
-  const product = await productModel.findOne({ _id: productId, seller: seller._id });
+  const product = await productModel.findOne({ _id: productId, seller: req.user._id });
   if (!product) {
     return next(new ApiError("Product not found or not owned by you", 404));
   }
@@ -278,15 +253,9 @@ exports.adjustVariationStock = asyncHandler(async (req, res, next) => {
 // @route   GET /products/variations/low-stock
 // @access  Seller
 exports.getLowStockVariations = asyncHandler(async (req, res, next) => {
-  // Get seller
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   // Get all products for this seller
   const products = await productModel.find({ 
-    seller: seller._id,
+    seller: req.user._id,
     hasVariations: true,
   }).select("title sku variations");
 
@@ -325,14 +294,8 @@ exports.bulkAddVariations = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
   const { colors, sizes, defaultPrice, defaultQuantity, defaultLowStockThreshold } = req.body;
 
-  // Get seller
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   // Get product and verify ownership
-  const product = await productModel.findOne({ _id: productId, seller: seller._id });
+  const product = await productModel.findOne({ _id: productId, seller: req.user._id });
   if (!product) {
     return next(new ApiError("Product not found or not owned by you", 404));
   }
@@ -536,14 +499,8 @@ exports.generateCombinations = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
   const { axes, combinations, defaultPrice, defaultQuantity, priceVariations, discountPercentage } = req.body;
 
-  // Get seller
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   // Get product and verify ownership
-  const product = await productModel.findOne({ _id: productId, seller: seller._id });
+  const product = await productModel.findOne({ _id: productId, seller: req.user._id });
   if (!product) {
     return next(new ApiError("Product not found or not owned by you", 404));
   }
