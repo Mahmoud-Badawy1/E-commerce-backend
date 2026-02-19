@@ -114,12 +114,16 @@ router
   );
 
 // Seller-specific routes
-router.use("/seller", authController.protect, authController.allowedTo("seller"));
-
 router
   .route("/seller")
-  .get(productController.getSellerProducts)
+  .get(
+    authController.protect,
+    authController.allowedTo("seller"),
+    productController.getSellerProducts
+  )
   .post(
+    authController.protect,
+    authController.allowedTo("seller"),
     uploadImageMiddleware.uploadMultipleImage(), // Parse multipart data
     productValidator.createProductValidator,
     productController.createSellerProduct
@@ -127,23 +131,39 @@ router
 
 router
   .route("/seller/bulk-import")
-  .post(productController.bulkImportProducts);
+  .post(
+    authController.protect,
+    authController.allowedTo("seller"),
+    productController.bulkImportProducts
+  );
 
 router
   .route("/seller/:id/upload-images")
   .post(
+    authController.protect,
+    authController.allowedTo("seller"),
     uploadImageMiddleware.uploadMultipleImage(),
     productController.uploadSellerProductImages
   );
 
 router
   .route("/seller/:id")
-  .get(productController.getSellerProduct)
+  .get(
+    authController.protect,
+    authController.allowedTo("seller"),
+    productController.getSellerProduct
+  )
   .put(
+    authController.protect,
+    authController.allowedTo("seller"),
     productValidator.updateProductValidator,
     productController.updateSellerProduct
   )
-  .delete(productController.deleteSellerProduct);
+  .delete(
+    authController.protect,
+    authController.allowedTo("seller"),
+    productController.deleteSellerProduct
+  );
 
 router
   .route("/:id")
