@@ -467,7 +467,11 @@ productSchema.virtual("reviews", {
 productSchema.pre(/^find/, function (next) {
   this.populate({
     path: "category",
-    select: "name -_id",
+    select: "name _id",
+  });
+  this.populate({
+    path: "seller",
+    select: "name email _id",
   });
   this.populate({
     path: "reviews",
