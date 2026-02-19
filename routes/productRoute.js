@@ -93,7 +93,7 @@ router
     variationController.getLowStockVariations
   );
 
-// Product image upload route
+// Product image upload route (legacy standalone upload)
 router
   .route("/upload-images")
   .post(
@@ -120,6 +120,7 @@ router
   .route("/seller")
   .get(productController.getSellerProducts)
   .post(
+    uploadImageMiddleware.uploadMultipleImage(), // Parse multipart data
     productValidator.createProductValidator,
     productController.createSellerProduct
   );
@@ -127,6 +128,13 @@ router
 router
   .route("/seller/bulk-import")
   .post(productController.bulkImportProducts);
+
+router
+  .route("/seller/:id/upload-images")
+  .post(
+    uploadImageMiddleware.uploadMultipleImage(),
+    productController.uploadSellerProductImages
+  );
 
 router
   .route("/seller/:id")
@@ -154,6 +162,16 @@ router
     authController.allowedTo("admin"),
     productValidator.deleteProductValidator,
     productController.deleteProduct
+  );
+
+// Admin route to upload images for any product
+router
+  .route("/:id/upload-images")
+  .post(
+    authController.protect,
+    authController.allowedTo("admin"),
+    uploadImageMiddleware.uploadMultipleImage(),
+    productController.uploadProductImagesById
   );
 
 module.exports = router;

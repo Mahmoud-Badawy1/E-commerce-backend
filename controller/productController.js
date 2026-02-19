@@ -7,7 +7,7 @@ const ApiFeatures = require("../utils/apiFeatures");
 const slugify = require("slugify");
 const uploadToCloudinary = require("../utils/uploadToCloudinary");
 
-// Upload product images to Cloudinary
+// Upload product images to Cloudinary (Legacy - for standalone image upload)
 exports.uploadProductImages = asyncHandler(async (req, res, next) => {
   if (!req.files || (!req.files.imageCover && !req.files.images)) {
     return next(new ApiError("Please upload product images", 400));
@@ -44,6 +44,132 @@ exports.uploadProductImages = asyncHandler(async (req, res, next) => {
       data: {
         imageCover: imageCoverUrl,
         images: imageUrls,
+      },
+    });
+  } catch (error) {
+    return next(new ApiError(`Image upload failed: ${error.message}`, 500));
+  }
+});
+
+// Upload images for an existing product
+exports.uploadProductImagesById = asyncHandler(async (req, res, next) => {
+  const productId = req.params.id;
+  
+  // Find product and check ownership
+  const product = await productModel.findById(productId);
+  if (!product) {
+    return next(new ApiError("Product not found", 404));
+  }
+
+  // Check if files are provided
+  if (!req.files || (!req.files.imageCover && !req.files.images)) {
+    return next(new ApiError("Please upload product images", 400));
+  }
+
+  try {
+    let imageCoverUrl = product.imageCover; // Keep existing if not updating
+    let imageUrls = [...product.images]; // Keep existing images
+
+    // Upload cover image if provided
+    if (req.files.imageCover && req.files.imageCover[0]) {
+      imageCoverUrl = await uploadToCloudinary.uploadSingle(
+        req.files.imageCover[0].buffer, 
+        "products", 
+        800, 
+        600
+      );
+    }
+
+    // Upload additional images if provided
+    if (req.files.images && req.files.images.length > 0) {
+      const imageBuffers = req.files.images.map(file => file.buffer);
+      const newImageUrls = await uploadToCloudinary.uploadMultiple(
+        imageBuffers, 
+        "products", 
+        800, 
+        600
+      );
+      imageUrls = [...imageUrls, ...newImageUrls];
+    }
+
+    // Update product with new images
+    product.imageCover = imageCoverUrl;
+    product.images = imageUrls;
+    await product.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Product images uploaded and updated successfully",
+      data: {
+        product,
+      },
+    });
+  } catch (error) {
+    return next(new ApiError(`Image upload failed: ${error.message}`, 500));
+  }
+});
+
+// Upload images for seller's product
+exports.uploadSellerProductImages = asyncHandler(async (req, res, next) => {
+  const productId = req.params.id;
+  
+  // Find seller
+  const seller = await sellerModel.findOne({ userId: req.user._id });
+  if (!seller) {
+    return next(new ApiError("Seller profile not found", 404));
+  }
+
+  // Find product and check ownership
+  const product = await productModel.findOne({
+    _id: productId,
+    seller: seller._id,
+  });
+
+  if (!product) {
+    return next(new ApiError("Product not found or not owned by you", 404));
+  }
+
+  // Check if files are provided
+  if (!req.files || (!req.files.imageCover && !req.files.images)) {
+    return next(new ApiError("Please upload product images", 400));
+  }
+
+  try {
+    let imageCoverUrl = product.imageCover; // Keep existing if not updating
+    let imageUrls = [...product.images]; // Keep existing images
+
+    // Upload cover image if provided
+    if (req.files.imageCover && req.files.imageCover[0]) {
+      imageCoverUrl = await uploadToCloudinary.uploadSingle(
+        req.files.imageCover[0].buffer, 
+        "products", 
+        800, 
+        600
+      );
+    }
+
+    // Upload additional images if provided
+    if (req.files.images && req.files.images.length > 0) {
+      const imageBuffers = req.files.images.map(file => file.buffer);
+      const newImageUrls = await uploadToCloudinary.uploadMultiple(
+        imageBuffers, 
+        "products", 
+        800, 
+        600
+      );
+      imageUrls = [...imageUrls, ...newImageUrls];
+    }
+
+    // Update product with new images
+    product.imageCover = imageCoverUrl;
+    product.images = imageUrls;
+    await product.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Product images uploaded and updated successfully",
+      data: {
+        product,
       },
     });
   } catch (error) {
@@ -97,6 +223,9 @@ exports.createSellerProduct = asyncHandler(async (req, res, next) => {
 
   req.body.seller = seller._id;
 
+  // Note: Images sent during creation are ignored
+  // Use POST /api/products/seller/:id/upload-images after product creation
+  
   // Extract variation data if provided
   const { variationData, ...productData } = req.body;
 

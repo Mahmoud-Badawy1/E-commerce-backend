@@ -65,10 +65,11 @@ const productSchema = new mongoose.Schema(
     },
     imageCover: {
       type: String,
-      required: [true, "Image cover image is required"],
+      default: "https://via.placeholder.com/800x600.png?text=Product+Image",
     },
     images: {
       type: [String],
+      default: [],
     },
     category: {
       type: mongoose.Schema.ObjectId,
