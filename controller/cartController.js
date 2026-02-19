@@ -35,11 +35,37 @@ exports.getAllProductsInCart = asyncHandler(async (req, res, next) => {
 });
 
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
-  const { productId, color, size } = req.body;
-  console.log("Adding product to cart",productId,color,size);
+  const { productId, color, size, variationId } = req.body;
+  console.log("Adding product to cart",productId,color,size,variationId);
   
   const product = await productModel.findById(productId);
   console.log("Found product:",product);
+  
+  if (!product) {
+    return next(new ApiError("Product not found", 404));
+  }
+
+  // Validate variation stock if product has variations
+  let itemPrice = product.priceAfterDiscount || product.price;
+  let availableStock = product.quantity - product.reservedStock;
+  
+  if (product.hasVariations && color && size) {
+    const variation = product.findVariation(color, size);
+    if (!variation) {
+      return next(new ApiError(`Variation ${color} - ${size} not found`, 404));
+    }
+    if (!variation.isActive) {
+      return next(new ApiError(`Variation ${color} - ${size} is not available`, 400));
+    }
+    itemPrice = variation.priceAfterDiscount || variation.price;
+    availableStock = variation.quantity - variation.reservedStock;
+    
+    if (availableStock < 1) {
+      return next(new ApiError(`Variation ${color} - ${size} is out of stock`, 400));
+    }
+  } else if (availableStock < 1) {
+    return next(new ApiError("Product is out of stock", 400));
+  }
   
   let cart = await cartModel.findOne({ user: req.user._id });
   console.log("Current cart:",cart);
@@ -47,23 +73,43 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
   if (!cart) {
     cart = await cartModel.create({
       user: req.user._id,
-      cartItems: [{ product: productId, color: color, size: size, price: product.price }],
+      cartItems: [{ 
+        product: productId, 
+        color: color, 
+        size: size, 
+        price: itemPrice,
+        variationId: variationId
+      }],
     });
     console.log("Created new cart:",cart);
   } else {
     const productIndex = cart.cartItems.findIndex(
-      (item) => item.product.toString() == productId && item.color == color && item.size == size
+      (item) => {
+        if (variationId) {
+          return item.variationId && item.variationId.toString() === variationId;
+        }
+        return item.product.toString() == productId && item.color == color && item.size == size;
+      }
     );
+    
     if (productIndex >= 0) {
       const cartItem = cart.cartItems[productIndex];
-      cartItem.quantity++;
+      const newQuantity = cartItem.quantity + 1;
+      
+      // Check if new quantity exceeds available stock
+      if (newQuantity > availableStock) {
+        return next(new ApiError(`Only ${availableStock} items available in stock`, 400));
+      }
+      
+      cartItem.quantity = newQuantity;
       cart.cartItems[productIndex] = cartItem;
     } else {
       cart.cartItems.push({
         product: productId,
         color: color,
         size: size,
-        price: product.price,
+        price: itemPrice,
+        variationId: variationId
       });
     }
   }

@@ -25,6 +25,9 @@ const orderSchema = new mongoose.Schema(
         price: {
           type: Number,
         },
+        variationId: {
+          type: mongoose.Schema.ObjectId,
+        },
         seller: {
           type: mongoose.Schema.ObjectId,
           ref: "Seller",

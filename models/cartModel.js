@@ -21,6 +21,9 @@ const cartSchema = new mongoose.Schema(
         price: {
           type: Number,
         },
+        variationId: {
+          type: mongoose.Schema.ObjectId,
+        },
       },
     ],
     user: {

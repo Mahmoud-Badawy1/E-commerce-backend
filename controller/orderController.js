@@ -130,6 +130,7 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
       color: item.color,
       size: item.size,
       price: item.price,
+      variationId: item.variationId,
       seller: item.product.seller
     })),
     cartPrice: cartPrice,
@@ -139,22 +140,37 @@ exports.createCashOrder = asyncHandler(async (req, res, next) => {
     status: "pending",
   });
   if (order) {
-    const bulkOption = cart.cartItems.map((item) => ({
-      updateOne: {
-        filter: { _id: item.product },
-        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
-      },
-    }));
-    await productModel.bulkWrite(bulkOption, {});
-    
     // Reserve stock for order items
     for (const item of cart.cartItems) {
-      const product = await productModel.findById(item.product);
-      if (product) {
+      const product = await productModel.findById(item.product._id);
+      
+      if (!product) continue;
+      
+      if (product.hasVariations && item.variationId) {
+        // Reserve stock for specific variation
+        const variation = product.variations.id(item.variationId);
+        if (variation) {
+          const availableStock = variation.quantity - variation.reservedStock;
+          if (availableStock < item.quantity) {
+            // Rollback order if insufficient stock
+            await orderModel.findByIdAndDelete(order._id);
+            throw new ApiError(`Insufficient stock for ${variation.color} - ${variation.size}`, 400);
+          }
+          variation.reservedStock += item.quantity;
+        }
+      } else {
+        // Reserve stock for main product
+        const availableStock = product.quantity - product.reservedStock;
+        if (availableStock < item.quantity) {
+          // Rollback order if insufficient stock
+          await orderModel.findByIdAndDelete(order._id);
+          throw new ApiError(`Insufficient stock for ${product.title}`, 400);
+        }
         product.reservedStock += item.quantity;
-        product.addStockHistory("reserved", item.quantity, order._id, "Stock reserved for cash order", req.user._id);
-        await product.save();
       }
+      
+      product.addStockHistory("reserved", item.quantity, order._id, "Stock reserved for cash order", req.user._id);
+      await product.save();
     }
     
     await cartModel.findByIdAndDelete(req.params.id);
@@ -196,6 +212,7 @@ const createCreditOrder = async (paymentData) => {
       color: item.color,
       size: item.size,
       price: item.price,
+      variationId: item.variationId,
       seller: item.product.seller
     })),
     cartPrice,
@@ -209,13 +226,28 @@ const createCreditOrder = async (paymentData) => {
   });
 
   if (order) {
-    const bulkOption = cart.cartItems.map((item) => ({
-      updateOne: {
-        filter: { _id: item.product },
-        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
-      },
-    }));
-    await productModel.bulkWrite(bulkOption);
+    // Update stock for each item (paid order - consume stock immediately)
+    for (const item of cart.cartItems) {
+      const product = await productModel.findById(item.product._id);
+      
+      if (!product) continue;
+      
+      if (product.hasVariations && item.variationId) {
+        // Update specific variation stock
+        const variation = product.variations.id(item.variationId);
+        if (variation) {
+          variation.quantity -= item.quantity;
+        }
+      } else {
+        // Update main product stock
+        product.quantity -= item.quantity;
+      }
+      
+      product.sold += item.quantity;
+      product.addStockHistory("sale", item.quantity, order._id, "Stock consumed for online payment order");
+      await product.save();
+    }
+    
     await cartModel.findByIdAndDelete(cart._id);
   }
 };
@@ -339,11 +371,24 @@ exports.updateOrderStatus = asyncHandler(async (req, res, next) => {
     // Release reserved stock when order is cancelled
     for (const item of order.items) {
       const product = await productModel.findById(item.product._id);
-      if (product && product.reservedStock > 0) {
-        product.reservedStock = Math.max(0, product.reservedStock - item.quantity);
-        product.addStockHistory("released", item.quantity, order._id, "Stock released due to order cancellation", req.user._id);
-        await product.save();
+      
+      if (!product) continue;
+      
+      if (product.hasVariations && item.variationId) {
+        // Release reserved stock for specific variation
+        const variation = product.variations.id(item.variationId);
+        if (variation && variation.reservedStock >= item.quantity) {
+          variation.reservedStock -= item.quantity;
+        }
+      } else {
+        // Release reserved stock for main product
+        if (product.reservedStock >= item.quantity) {
+          product.reservedStock -= item.quantity;
+        }
       }
+      
+      product.addStockHistory("released", item.quantity, order._id, "Stock released due to order cancellation", req.user._id);
+      await product.save();
     }
   }
   
@@ -351,11 +396,27 @@ exports.updateOrderStatus = asyncHandler(async (req, res, next) => {
     // Consume reserved stock when order is delivered
     for (const item of order.items) {
       const product = await productModel.findById(item.product._id);
-      if (product && product.reservedStock >= item.quantity) {
-        product.reservedStock -= item.quantity;
-        product.addStockHistory("sale", item.quantity, order._id, "Stock consumed on order delivery", req.user._id);
-        await product.save();
+      
+      if (!product) continue;
+      
+      if (product.hasVariations && item.variationId) {
+        // Consume reserved stock for specific variation
+        const variation = product.variations.id(item.variationId);
+        if (variation && variation.reservedStock >= item.quantity) {
+          variation.quantity -= item.quantity;
+          variation.reservedStock -= item.quantity;
+        }
+      } else {
+        // Consume reserved stock for main product
+        if (product.reservedStock >= item.quantity) {
+          product.quantity -= item.quantity;
+          product.reservedStock -= item.quantity;
+        }
       }
+      
+      product.sold += item.quantity;
+      product.addStockHistory("sale", item.quantity, order._id, "Stock consumed on order delivery", req.user._id);
+      await product.save();
     }
   }
   
@@ -657,9 +718,65 @@ exports.updateSellerOrder = asyncHandler(async (req, res, next) => {
     order.paidAt = req.body.isPaid ? Date.now() : undefined;
   }
 
+  const oldStatus = order.status;
+
   if (req.body.status) {
-    order.status = req.body.status;
-    if (req.body.status === "completed" || req.body.status === "delivered") {
+    const newStatus = req.body.status;
+    
+    // Handle stock management for status changes
+    if (newStatus === "cancelled" && oldStatus !== "cancelled") {
+      // Release reserved stock for seller's products when order is cancelled
+      for (const item of order.items) {
+        if (item.seller?.toString() !== seller._id.toString()) continue;
+        
+        const product = await productModel.findById(item.product);
+        if (!product) continue;
+        
+        if (product.hasVariations && item.variationId) {
+          const variation = product.variations.id(item.variationId);
+          if (variation && variation.reservedStock >= item.quantity) {
+            variation.reservedStock -= item.quantity;
+          }
+        } else {
+          if (product.reservedStock >= item.quantity) {
+            product.reservedStock -= item.quantity;
+          }
+        }
+        
+        product.addStockHistory("released", item.quantity, order._id, "Stock released by seller - order cancelled", req.user._id);
+        await product.save();
+      }
+    }
+    
+    if ((newStatus === "completed" || newStatus === "delivered") && oldStatus !== "delivered" && oldStatus !== "completed") {
+      // Consume reserved stock for seller's products when order is delivered/completed
+      for (const item of order.items) {
+        if (item.seller?.toString() !== seller._id.toString()) continue;
+        
+        const product = await productModel.findById(item.product);
+        if (!product) continue;
+        
+        if (product.hasVariations && item.variationId) {
+          const variation = product.variations.id(item.variationId);
+          if (variation && variation.reservedStock >= item.quantity) {
+            variation.quantity -= item.quantity;
+            variation.reservedStock -= item.quantity;
+          }
+        } else {
+          if (product.reservedStock >= item.quantity) {
+            product.quantity -= item.quantity;
+            product.reservedStock -= item.quantity;
+          }
+        }
+        
+        product.sold += item.quantity;
+        product.addStockHistory("sale", item.quantity, order._id, "Stock consumed by seller - order completed", req.user._id);
+        await product.save();
+      }
+    }
+    
+    order.status = newStatus;
+    if (newStatus === "completed" || newStatus === "delivered") {
       order.deliveredAt = Date.now();
     }
   }
