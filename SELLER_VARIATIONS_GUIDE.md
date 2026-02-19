@@ -7,7 +7,7 @@ As a seller, you can create products with multiple variations (colors, sizes), m
 
 ## 🏪 Seller Endpoints
 
-### 1. Create Product (Basic)
+### 1. Create Product (Basic - Without Variations)
 
 **Endpoint:**
 ```http
@@ -60,6 +60,79 @@ Authorization: Bearer {seller_token}
   }
 }
 ```
+
+---
+
+### 1B. Create Product WITH Variations (Single Step! 🚀)
+
+**Endpoint:**
+```http
+POST /api/products/seller
+Authorization: Bearer {seller_token}
+```
+
+**Request Body (Bulk Variations):**
+```json
+{
+  "title": "Premium Cotton T-Shirt",
+  "slug": "premium-cotton-tshirt",
+  "sku": "TSHIRT-001",
+  "description": "High-quality 100% cotton t-shirt with modern fit",
+  "price": 299.99,
+  "discountPercentage": 15,
+  "imageCover": "https://cloudinary.com/.../tshirt-cover.jpg",
+  "category": "65f7c0000000000000000003",
+  "status": "published",
+  "variationData": {
+    "colors": ["Red", "Blue", "Black", "White"],
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "defaultQuantity": 20,
+    "defaultLowStockThreshold": 5
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Product created with 20 variations",
+  "data": {
+    "product": {
+      "_id": "65f8a1234567890abcdef123",
+      "title": "Premium Cotton T-Shirt",
+      "sku": "TSHIRT-001",
+      "price": 299.99,
+      "hasVariations": true,
+      "colors": ["Red", "Blue", "Black", "White"],
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "variations": [
+        {
+          "_id": "65f8b9876543210fedcba001",
+          "color": "Red",
+          "size": "S",
+          "sku": "TSHIRT-001-RED-S",
+          "quantity": 20
+        }
+        // ... 19 more variations
+      ]
+    },
+    "addedVariations": [
+      "Red - S", "Red - M", "Red - L", "Red - XL", "Red - XXL",
+      "Blue - S", "Blue - M", "Blue - L", "Blue - XL", "Blue - XXL",
+      "Black - S", "Black - M", "Black - L", "Black - XL", "Black - XXL",
+      "White - S", "White - M", "White - L", "White - XL", "White - XXL"
+    ]
+  }
+}
+```
+
+**What Just Happened:**
+- ✅ Created product AND 20 variations in ONE request!
+- ✅ All color-size combinations created automatically
+- ✅ Each variation has 20 items in stock
+- ✅ Auto-generated SKUs for each variation
+- ✅ Ready to sell immediately!
 
 ---
 
@@ -704,7 +777,61 @@ Authorization: Bearer {seller_token}
 
 ## 🎯 Seller Workflow Examples
 
-### Scenario 1: Add New Product with Variations
+### Scenario 1A: Add New Product with Variations (✨ ONE STEP - RECOMMENDED)
+
+#### Single Request: Create Product + Variations
+```bash
+POST /api/products/seller
+Authorization: Bearer {token}
+
+{
+  "title": "Classic Polo Shirt",
+  "slug": "classic-polo-shirt",
+  "sku": "POLO-001",
+  "description": "Comfortable cotton polo shirt perfect for casual wear",
+  "price": 399.99,
+  "discountPercentage": 10,
+  "imageCover": "https://cloudinary.com/.../polo-cover.jpg",
+  "category": "65f7c0000000000000000003",
+  "status": "published",
+  "variationData": {
+    "colors": ["Navy", "White", "Gray", "Black"],
+    "sizes": ["S", "M", "L", "XL"],
+    "defaultQuantity": 25,
+    "defaultLowStockThreshold": 5
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Product created with 16 variations",
+  "data": {
+    "product": {
+      "_id": "65f8a1234567890abcdef456",
+      "title": "Classic Polo Shirt",
+      "hasVariations": true,
+      "variations": [ /* 16 variations */ ]
+    },
+    "addedVariations": [
+      "Navy - S", "Navy - M", "Navy - L", "Navy - XL",
+      "White - S", "White - M", "White - L", "White - XL",
+      "Gray - S", "Gray - M", "Gray - L", "Gray - XL", 
+      "Black - S", "Black - M", "Black - L", "Black - XL"
+    ]
+  }
+}
+```
+
+✅ **Done! Product and all 16 variations created in ONE request!**
+
+---
+
+### Scenario 1B: Add New Product with Variations (Two-Step Approach)
+
+If you prefer to create product first, then add variations:
 
 #### Step 1: Create Base Product
 ```bash

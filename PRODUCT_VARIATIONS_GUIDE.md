@@ -68,7 +68,46 @@ GET /api/products/:productId/variations/check-stock?color=Red&size=M&quantity=2
 
 ### **Seller Endpoints (Requires Authentication as Seller)**
 
-#### 3. Add Single Variation
+#### 3. Create Product with Variations (Single Step)
+```http
+POST /api/products/seller
+Authorization: Bearer <token>
+```
+
+**Request Body (Product + Bulk Variations):**
+```json
+{
+  "title": "Premium Cotton T-Shirt",
+  "slug": "premium-cotton-tshirt",
+  "sku": "TSHIRT-001",
+  "description": "High-quality cotton t-shirt",
+  "price": 299.99,
+  "discountPercentage": 15,
+  "imageCover": "https://...",
+  "category": "category_id",
+  "status": "published",
+  "variationData": {
+    "colors": ["Red", "Blue", "Black"],
+    "sizes": ["S", "M", "L", "XL"],
+    "defaultQuantity": 20,
+    "defaultLowStockThreshold": 5
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Product created with 12 variations",
+  "data": {
+    "product": { /* full product with variations */ },
+    "addedVariations": ["Red - S", "Red - M", ...]
+  }
+}
+```
+
+#### 4. Add Single Variation
 ```http
 POST /api/products/:productId/variations
 Authorization: Bearer <token>
@@ -88,7 +127,7 @@ Authorization: Bearer <token>
 }
 ```
 
-#### 4. Bulk Add Variations (Creates all combinations)
+#### 5. Bulk Add Variations (Creates all combinations)
 ```http
 POST /api/products/:productId/variations/bulk
 Authorization: Bearer <token>
@@ -107,7 +146,7 @@ Authorization: Bearer <token>
 
 This creates all combinations (e.g., Red-S, Red-M, Red-L, Red-XL, Blue-S, etc.)
 
-#### 5. Update Variation
+#### 6. Update Variation
 ```http
 PUT /api/products/:productId/variations/:variationId
 Authorization: Bearer <token>
@@ -125,13 +164,13 @@ Authorization: Bearer <token>
 }
 ```
 
-#### 6. Delete Variation
+#### 7. Delete Variation
 ```http
 DELETE /api/products/:productId/variations/:variationId
 Authorization: Bearer <token>
 ```
 
-#### 7. Adjust Variation Stock
+#### 8. Adjust Variation Stock
 ```http
 PUT /api/products/:productId/variations/:variationId/adjust-stock
 Authorization: Bearer <token>
@@ -146,7 +185,7 @@ Authorization: Bearer <token>
 }
 ```
 
-#### 8. Get Low Stock Variations (Seller's Products)
+#### 9. Get Low Stock Variations (Seller's Products)
 ```http
 GET /api/products/variations/low-stock
 Authorization: Bearer <token>
@@ -717,8 +756,18 @@ The product variations are stored in the Product model:
 
 ## Workflow
 
+### Option 1: Single Step (⚡ Faster - Recommended)
+1. **Seller creates product WITH variations** → Product + all variations in one API call
+2. **Seller manages stock** → Updates quantity for each variation as needed
+3. **Customer browses** → Sees product and selects color/size
+4. **System checks stock** → Verifies availability for selected variation
+5. **Customer adds to cart** → Cart stores variation details
+6. **Order placed** → Stock is reserved for the specific variation
+7. **Order fulfilled** → Reserved stock is consumed from the variation
+
+### Option 2: Two Steps (More Flexible)
 1. **Seller creates a product** → Basic product with title, description, category, etc.
-2. **Seller adds variations** → Uses bulk add to create all color-size combinations
+2. **Seller adds variations** → Uses bulk add or single add to create variations
 3. **Seller manages stock** → Updates quantity for each variation
 4. **Customer browses** → Sees product and selects color/size
 5. **System checks stock** → Verifies availability for selected variation
