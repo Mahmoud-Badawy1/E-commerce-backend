@@ -38,7 +38,7 @@ router
   .route("/:id/variation")
   .put(
     authController.protect,
-    authController.allowedTo("customer"),
+    authController.allowedTo("customer", "seller"),
     cartValidator.updateCartItemVariationValidator,
     cartController.updateCartItemVariation
   );
