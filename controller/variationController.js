@@ -7,7 +7,7 @@ const productModel = require("../models/productModel");
 // @access  Seller
 exports.addVariation = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
-  const { color, size, sku, price, discountPercentage, quantity, lowStockThreshold, image } = req.body;
+  const { options, sku, price, discountPercentage, quantity, lowStockThreshold, image } = req.body;
 
   // Get product and verify ownership
   const product = await productModel.findOne({ _id: productId, seller: req.user._id });
@@ -15,27 +15,43 @@ exports.addVariation = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Product not found or not owned by you", 404));
   }
 
-  // Check if variation already exists
-  const existingVariation = product.findVariation(color, size);
-  if (existingVariation) {
-    return next(new ApiError(`Variation ${color} - ${size} already exists`, 400));
+  // Validate options
+  if (!options || typeof options !== 'object' || Object.keys(options).length === 0) {
+    return next(new ApiError("Options object is required (e.g., { 'Color': 'Red', 'Size': 'M' })", 400));
   }
 
-  // Add color and size to product's available options if not already present
-  if (!product.colors.includes(color)) {
-    product.colors.push(color);
+  // Check if variation already exists
+  const existingVariation = product.findVariation(options);
+  if (existingVariation) {
+    const optionsStr = Object.entries(options).map(([k, v]) => `${k}: ${v}`).join(", ");
+    return next(new ApiError(`Variation ${optionsStr} already exists`, 400));
   }
-  if (!product.sizes.includes(size)) {
-    product.sizes.push(size);
+
+  // Initialize variations structure if needed
+  if (!product.variations.items) {
+    product.variations.items = [];
   }
+
+  // Update axes if new attribute types are used
+  const optionKeys = Object.keys(options);
+  optionKeys.forEach(key => {
+    if (!product.variations.axes.includes(key)) {
+      product.variations.axes.push(key);
+    }
+  });
+
+  // Generate SKU if not provided
+  const variationSku = sku || `${product.sku}-${Object.values(options).join("-").toUpperCase().replace(/\s+/g, "-")}`;
+
+  // Create options Map
+  const optionsMap = new Map(Object.entries(options));
 
   // Add variation
-  product.variations.push({
-    color,
-    size,
-    sku: sku || `${product.sku}-${color}-${size}`.toUpperCase(),
+  product.variations.items.push({
+    sku: variationSku,
+    options: optionsMap,
     price: price || product.price,
-    discountPercentage: discountPercentage || product.discountPercentage,
+    discountPercentage: discountPercentage || 0,
     quantity: quantity || 0,
     lowStockThreshold: lowStockThreshold || 5,
     image: image || product.imageCover,
@@ -45,9 +61,10 @@ exports.addVariation = asyncHandler(async (req, res, next) => {
   product.hasVariations = true;
   await product.save();
 
+  const optionsStr = Object.entries(options).map(([k, v]) => `${k}: ${v}`).join(", ");
   res.status(201).json({
     status: "success",
-    message: "Variation added successfully",
+    message: `Variation added successfully: ${optionsStr}`,
     data: product,
   });
 });

@@ -3,23 +3,17 @@ const validatorMiddleware = require("../middleWares/validatorMiddleware");
 
 // Validation for adding a single variation
 exports.addVariationValidator = [
-  check("color")
+  check("options")
     .notEmpty()
-    .withMessage("Color is required")
-    .isString()
-    .withMessage("Color must be a string")
-    .trim()
-    .isLength({ min: 2, max: 30 })
-    .withMessage("Color must be between 2 and 30 characters"),
-
-  check("size")
-    .notEmpty()
-    .withMessage("Size is required")
-    .isString()
-    .withMessage("Size must be a string")
-    .trim()
-    .isLength({ min: 1, max: 20 })
-    .withMessage("Size must be between 1 and 20 characters"),
+    .withMessage("Options object is required (e.g., { 'Color': 'Red', 'Size': 'M' })")
+    .isObject()
+    .withMessage("Options must be an object")
+    .custom((value) => {
+      if (Object.keys(value).length === 0) {
+        throw new Error("Options object cannot be empty");
+      }
+      return true;
+    }),
 
   check("sku")
     .optional()
