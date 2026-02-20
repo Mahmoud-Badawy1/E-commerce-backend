@@ -216,3 +216,86 @@ exports.applyCouponToCart = asyncHandler(async (req, res, next) => {
     data: cart,
   });
 });
+
+exports.updateCartItemVariation = asyncHandler(async (req, res, next) => {
+  const { variationOptions } = req.body;
+  const { id } = req.params; // cart item id
+
+  if (!variationOptions || typeof variationOptions !== 'object' || Object.keys(variationOptions).length === 0) {
+    return next(new ApiError("variationOptions object is required", 400));
+  }
+
+  const cart = await cartModel.findOne({ user: req.user._id });
+  if (!cart) {
+    return next(new ApiError("No cart found for this user", 404));
+  }
+
+  const itemIndex = cart.cartItems.findIndex(
+    (item) => item._id.toString() === id
+  );
+
+  if (itemIndex === -1) {
+    return next(new ApiError("Product not found in cart", 404));
+  }
+
+  const cartItem = cart.cartItems[itemIndex];
+  const product = await productModel.findById(cartItem.product);
+
+  if (!product) {
+    return next(new ApiError("Product not found", 404));
+  }
+
+  if (!product.hasVariations) {
+    return next(new ApiError("This product does not have variations", 400));
+  }
+
+  // Find the new variation
+  const newVariation = product.findVariation(variationOptions);
+  if (!newVariation) {
+    const optionsStr = JSON.stringify(variationOptions);
+    return next(new ApiError(`Variation ${optionsStr} not found`, 404));
+  }
+
+  if (!newVariation.isActive) {
+    const optionsStr = JSON.stringify(variationOptions);
+    return next(new ApiError(`Variation ${optionsStr} is not available`, 400));
+  }
+
+  // Check if this new variation already exists in cart
+  const duplicateIndex = cart.cartItems.findIndex(
+    (item, idx) => {
+      if (idx === itemIndex) return false; // Skip current item
+      if (item.product.toString() !== cartItem.product.toString()) return false;
+      if (!item.variationOptions) return false;
+      
+      const itemOptions = Object.fromEntries(item.variationOptions);
+      return JSON.stringify(itemOptions) === JSON.stringify(variationOptions);
+    }
+  );
+
+  if (duplicateIndex !== -1) {
+    return next(new ApiError("This variation is already in your cart. Please update its quantity instead.", 400));
+  }
+
+  // Check stock availability for the requested quantity
+  const availableStock = newVariation.quantity - newVariation.reservedStock;
+  if (cartItem.quantity > availableStock) {
+    return next(new ApiError(`Only ${availableStock} items available in stock for this variation`, 400));
+  }
+
+  // Update the cart item with new variation
+  const optionsMap = new Map(Object.entries(variationOptions));
+  cartItem.variationOptions = optionsMap;
+  cartItem.price = newVariation.priceAfterDiscount || newVariation.price;
+
+  cart.cartItems[itemIndex] = cartItem;
+  calculateCartPrice(cart);
+  await cart.save();
+
+  res.status(200).json({
+    status: "success",
+    results: cart.cartItems.length,
+    message: "Product variation updated successfully",
+    data: cart,
+  });
+});
