@@ -9,12 +9,12 @@ router
   .route("/")
   .get(
     authController.protect,
-    authController.allowedTo("customer"),
+    authController.allowedTo("customer", "seller"),
     wishlistController.getAllWishlists
   )
   .post(
     authController.protect,
-    authController.allowedTo("customer"),
+    authController.allowedTo("customer", "seller"),
     wishlistValidator.addProductToWishlistValidator,
     wishlistController.addProductToWishlist
   );
@@ -23,7 +23,7 @@ router
   .route("/:id")
   .delete(
     authController.protect,
-    authController.allowedTo("customer"),
+    authController.allowedTo("customer", "seller"),
     wishlistValidator.removeProductFromWishlistValidator,
     wishlistController.removeProductFromWishlist
   );
