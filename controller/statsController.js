@@ -181,50 +181,113 @@ exports.getSellerProvinceStats = asyncHandler(async (req, res, next) => {
 exports.getSellerDashboardStats = asyncHandler(async (req, res, next) => {
   const seller = await findOrCreateSellerProfile(req.user);
 
-  const totalProducts = await productModel.countDocuments({
-    seller: seller._id,
-  });
+  // ── Period setup ──────────────────────────────────────────────────────────
+  const period = req.query.period || "week";
+  const now = new Date();
+  let currentStart, previousStart, previousEnd;
 
-  const orders = await orderModel.aggregate([
-    {
-      $match: {
-        "items.seller": seller._id,
-        status: { $nin: ["cancelled"] },
-      },
-    },
-    {
-      $project: {
-        items: {
-          $filter: {
-            input: "$items",
-            cond: { $eq: ["$$this.seller", seller._id] },
-          },
+  if (period === "week") {
+    // Current: last 7 days; Previous: 7 days before that
+    currentStart  = new Date(now); currentStart.setDate(now.getDate() - 7);  currentStart.setHours(0,0,0,0);
+    previousEnd   = new Date(currentStart);
+    previousStart = new Date(currentStart); previousStart.setDate(previousStart.getDate() - 7);
+  } else if (period === "month") {
+    // Current: this calendar month; Previous: last calendar month
+    currentStart  = new Date(now.getFullYear(), now.getMonth(), 1);
+    previousStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    previousEnd   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+  } else if (period === "year") {
+    // Current: this calendar year; Previous: last calendar year
+    currentStart  = new Date(now.getFullYear(), 0, 1);
+    previousStart = new Date(now.getFullYear() - 1, 0, 1);
+    previousEnd   = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999);
+  } else {
+    return next(new ApiError("Invalid period. Use week, month, or year", 400));
+  }
+
+  // ── Helper: aggregate revenue + order count for a date range ─────────────
+  const getOrderStats = async (dateFilter) => {
+    const orders = await orderModel.aggregate([
+      {
+        $match: {
+          "items.seller": seller._id,
+          status: { $nin: ["cancelled"] },
+          ...dateFilter,
         },
-        customer: 1,
       },
-    },
-  ]);
+      {
+        $project: {
+          items: {
+            $filter: {
+              input: "$items",
+              cond: { $eq: ["$$this.seller", seller._id] },
+            },
+          },
+          customer: 1,
+        },
+      },
+    ]);
 
-  let totalRevenue = 0;
-  const totalTransactions = orders.length;
+    let revenue = 0;
+    orders.forEach((o) => o.items.forEach((i) => { revenue += i.price * i.quantity; }));
+    return { revenue, transactions: orders.length, orders };
+  };
 
-  orders.forEach((order) => {
-    order.items.forEach((item) => {
-      totalRevenue += item.price * item.quantity;
-    });
-  });
+  // ── Current & previous period queries (parallel) ─────────────────────────
+  const [current, previous, currentCustomers, previousCustomers, totalProducts, currentProducts, previousProducts] =
+    await Promise.all([
+      getOrderStats({ createdAt: { $gte: currentStart, $lte: now } }),
+      getOrderStats({ createdAt: { $gte: previousStart, $lte: previousEnd } }),
+      orderModel.distinct("customer", {
+        "items.seller": seller._id,
+        createdAt: { $gte: currentStart, $lte: now },
+      }),
+      orderModel.distinct("customer", {
+        "items.seller": seller._id,
+        createdAt: { $gte: previousStart, $lte: previousEnd },
+      }),
+      productModel.countDocuments({ seller: seller._id }),
+      productModel.countDocuments({ seller: seller._id, createdAt: { $gte: currentStart, $lte: now } }),
+      productModel.countDocuments({ seller: seller._id, createdAt: { $gte: previousStart, $lte: previousEnd } }),
+    ]);
 
-  const uniqueCustomers = await orderModel.distinct("customer", {
-    "items.seller": seller._id,
-  });
+  // ── Percentage change helper ──────────────────────────────────────────────
+  const pctChange = (curr, prev) => {
+    if (prev === 0) return curr > 0 ? 100 : 0;
+    return Math.round(((curr - prev) / prev) * 10000) / 100; // 2 decimal places
+  };
+
+  const trend = (curr, prev) => (curr >= prev ? "up" : "down");
 
   res.status(200).json({
     status: "success",
+    period,
     data: {
-      totalRevenue,
-      totalCustomers: uniqueCustomers.length,
-      totalTransactions,
-      totalProducts,
+      totalRevenue: {
+        current: current.revenue,
+        previous: previous.revenue,
+        change: pctChange(current.revenue, previous.revenue),
+        trend: trend(current.revenue, previous.revenue),
+      },
+      totalTransactions: {
+        current: current.transactions,
+        previous: previous.transactions,
+        change: pctChange(current.transactions, previous.transactions),
+        trend: trend(current.transactions, previous.transactions),
+      },
+      totalCustomers: {
+        current: currentCustomers.length,
+        previous: previousCustomers.length,
+        change: pctChange(currentCustomers.length, previousCustomers.length),
+        trend: trend(currentCustomers.length, previousCustomers.length),
+      },
+      totalProducts: {
+        allTime: totalProducts,
+        addedThisPeriod: currentProducts,
+        addedPreviousPeriod: previousProducts,
+        change: pctChange(currentProducts, previousProducts),
+        trend: trend(currentProducts, previousProducts),
+      },
     },
   });
 });
