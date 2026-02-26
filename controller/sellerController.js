@@ -4,6 +4,7 @@ const ApiError = require("../utils/apiError");
 const createToken = require("../utils/createToken");
 const sellerModel = require("../models/sellerModel");
 const userModel = require("../models/userModel");
+const findOrCreateSellerProfile = require("../utils/findOrCreateSellerProfile");
 const uploadToCloudinary = require("../utils/uploadToCloudinary");
 
 // Create seller profile (called after user registration)
@@ -27,15 +28,13 @@ exports.createSellerProfile = asyncHandler(async (req, res, next) => {
 
 // Get seller profile
 exports.getSellerProfile = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found. Please create your profile first.", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
   res.status(200).json({ data: seller });
 });
 
 // Update seller profile (firstName, lastName, gender, dateOfBirth, profileImage)
 exports.updateSellerProfile = asyncHandler(async (req, res, next) => {
+  await findOrCreateSellerProfile(req.user);
   const seller = await sellerModel.findOneAndUpdate(
     { userId: req.user._id },
     {
@@ -47,14 +46,12 @@ exports.updateSellerProfile = asyncHandler(async (req, res, next) => {
     },
     { new: true, runValidators: true }
   );
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
   res.status(200).json({ data: seller });
 });
 
 // Update contact details (phone, country, address)
 exports.updateContactDetails = asyncHandler(async (req, res, next) => {
+  await findOrCreateSellerProfile(req.user);
   const seller = await sellerModel.findOneAndUpdate(
     { userId: req.user._id },
     {
@@ -64,9 +61,6 @@ exports.updateContactDetails = asyncHandler(async (req, res, next) => {
     },
     { new: true, runValidators: true }
   );
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
   res.status(200).json({ data: seller });
 });
 
@@ -109,7 +103,7 @@ exports.uploadProfileImage = asyncHandler(async (req, res, next) => {
     );
 
     // Delete old image from Cloudinary if exists
-    const seller = await sellerModel.findOne({ userId: req.user._id });
+    const seller = await findOrCreateSellerProfile(req.user);
     if (seller && seller.profileImage && seller.profileImage.includes('cloudinary')) {
       await uploadToCloudinary.deleteFromCloudinary(seller.profileImage);
     }
@@ -120,10 +114,6 @@ exports.uploadProfileImage = asyncHandler(async (req, res, next) => {
       { profileImage: imageUrl },
       { new: true }
     );
-
-    if (!updatedSeller) {
-      return next(new ApiError("Seller profile not found", 404));
-    }
 
     res.status(200).json({
       status: "success",
@@ -140,11 +130,7 @@ exports.uploadProfileImage = asyncHandler(async (req, res, next) => {
 
 // Remove seller profile image
 exports.removeProfileImage = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   if (!seller.profileImage) {
     return next(new ApiError("No profile image found", 400));

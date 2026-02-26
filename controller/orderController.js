@@ -7,6 +7,7 @@ const userModel = require("../models/userModel");
 const productModel = require("../models/productModel");
 const sellerModel = require("../models/sellerModel");
 const deliveryModel = require("../models/deliveryModel");
+const findOrCreateSellerProfile = require("../utils/findOrCreateSellerProfile");
 const ApiFeatures = require("../utils/apiFeatures");
 const settingController = require("./settingController");
 
@@ -452,10 +453,7 @@ const ensureSellerOwnsOrder = async (sellerId, order) => {
 
 // List orders for logged-in seller with filters and pagination
 exports.getSellerOrders = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
   
   // Build base match conditions using direct sellerId filter on items
   const matchConditions = {
@@ -615,10 +613,7 @@ exports.getSellerOrders = asyncHandler(async (req, res, next) => {
 
 // Get single order for seller
 exports.getSellerOrderDetails = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   // Fetch order with populated products
   const order = await orderModel.aggregate([
@@ -699,10 +694,7 @@ exports.getSellerOrderDetails = asyncHandler(async (req, res, next) => {
 
 // Update order status/payment for seller
 exports.updateSellerOrder = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const order = await orderModel.findById(req.params.id);
   if (!order) {
@@ -797,10 +789,7 @@ exports.updateSellerOrder = asyncHandler(async (req, res, next) => {
 
 // Delete order for seller (if business allows)
 exports.deleteSellerOrder = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const order = await orderModel.findById(req.params.id);
   if (!order) {

@@ -3,16 +3,14 @@ const ApiError = require("../utils/apiError");
 const ApiFeatures = require("../utils/apiFeatures");
 const productModel = require("../models/productModel");
 const sellerModel = require("../models/sellerModel");
+const findOrCreateSellerProfile = require("../utils/findOrCreateSellerProfile");
 
 // Adjust stock (add or subtract)
 exports.adjustStock = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
   const { quantity, type, reason } = req.body;
 
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const product = await productModel.findOne({ _id: productId, seller: seller._id });
   if (!product) {
@@ -55,10 +53,7 @@ exports.setLowStockThreshold = asyncHandler(async (req, res, next) => {
     return next(new ApiError("Threshold must be a positive number", 400));
   }
 
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const product = await productModel.findOne({ _id: productId, seller: seller._id });
   if (!product) {
@@ -83,10 +78,7 @@ exports.setLowStockThreshold = asyncHandler(async (req, res, next) => {
 
 // Get low stock products for a seller
 exports.getLowStockProducts = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const filter = { seller: seller._id, isLowStock: true };
   const documentsCount = await productModel.countDocuments(filter);
@@ -119,10 +111,7 @@ exports.getLowStockProducts = asyncHandler(async (req, res, next) => {
 exports.getStockHistory = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
 
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const product = await productModel.findOne({ _id: productId, seller: seller._id });
   if (!product) {
@@ -153,10 +142,7 @@ exports.getStockHistory = asyncHandler(async (req, res, next) => {
 exports.getPriceHistory = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
 
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const product = await productModel.findOne({ _id: productId, seller: seller._id });
   if (!product) {
@@ -185,10 +171,7 @@ exports.getPriceHistory = asyncHandler(async (req, res, next) => {
 
 // Get inventory dashboard (overview)
 exports.getInventoryDashboard = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const products = await productModel.find({ seller: seller._id });
 
@@ -229,10 +212,7 @@ exports.updateProductPrice = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
   const { price, discountPercentage, reason } = req.body;
 
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const product = await productModel.findOne({ _id: productId, seller: seller._id });
   if (!product) {

@@ -5,6 +5,7 @@ const productModel = require("../models/productModel");
 const userModel = require("../models/userModel");
 const sellerModel = require("../models/sellerModel");
 const salesTargetModel = require("../models/salesTargetModel");
+const findOrCreateSellerProfile = require("../utils/findOrCreateSellerProfile");
 const adModel = require("../models/adModel");
 const bannerModel = require("../models/bannerModel");
 const featuredProductModel = require("../models/featuredProductModel");
@@ -14,10 +15,7 @@ const mongoose = require("mongoose");
 
 // Get popular/most selling products for seller
 exports.getSellerPopularProducts = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const limit = parseInt(req.query.limit) || 10;
 
@@ -36,11 +34,6 @@ exports.getSellerPopularProducts = asyncHandler(async (req, res, next) => {
 
 // Get sales analytics (average sale value & items per sale)
 exports.getSellerSalesAnalytics = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
-
   const period = req.query.period || "month";
   const now = new Date();
   let startDate;
@@ -54,6 +47,8 @@ exports.getSellerSalesAnalytics = asyncHandler(async (req, res, next) => {
   } else {
     return next(new ApiError("Invalid period. Use day, month, or year", 400));
   }
+
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const orders = await orderModel.aggregate([
     {
@@ -106,10 +101,7 @@ exports.getSellerSalesAnalytics = asyncHandler(async (req, res, next) => {
 
 // Get customer growth stats
 exports.getSellerCustomerGrowth = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const customers = await orderModel.aggregate([
     {
@@ -152,10 +144,7 @@ exports.getSellerCustomerGrowth = asyncHandler(async (req, res, next) => {
 
 // Get province stats
 exports.getSellerProvinceStats = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const orders = await orderModel
     .find({ "items.seller": seller._id })
@@ -190,10 +179,7 @@ exports.getSellerProvinceStats = asyncHandler(async (req, res, next) => {
 
 // Get seller dashboard stats
 exports.getSellerDashboardStats = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const totalProducts = await productModel.countDocuments({
     seller: seller._id,
@@ -245,10 +231,7 @@ exports.getSellerDashboardStats = asyncHandler(async (req, res, next) => {
 
 // Set seller sales target
 exports.setSellerSalesTarget = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const { targetAmount, period } = req.body;
 
@@ -291,10 +274,7 @@ exports.setSellerSalesTarget = asyncHandler(async (req, res, next) => {
 
 // Get seller sales target with progress
 exports.getSellerSalesTarget = asyncHandler(async (req, res, next) => {
-  const seller = await sellerModel.findOne({ userId: req.user._id });
-  if (!seller) {
-    return next(new ApiError("Seller profile not found", 404));
-  }
+  const seller = await findOrCreateSellerProfile(req.user);
 
   const salesTarget = await salesTargetModel.findOne({
     seller: seller._id,
