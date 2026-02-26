@@ -16,8 +16,8 @@ router.get(
 router.put(
   "/updateMyData",
   authController.protect,
-  userController.updateMyData,
-  userValidator.updateUserValidator
+  userValidator.updateMyDataValidator,
+  userController.updateMyData
 );
 
 // Avatar upload routes

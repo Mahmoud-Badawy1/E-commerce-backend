@@ -126,6 +126,51 @@ exports.updateUserValidator = [
   validatorMiddleWare,
 ];
 
+exports.updateMyDataValidator = [
+  check("name")
+    .optional()
+    .isLength({ min: 3 })
+    .withMessage("Name must be at least 3 characters")
+    .isLength({ max: 30 })
+    .withMessage("Name must be at most 30 characters")
+    .custom((value, { req }) => {
+      if (value) req.body.slug = slugify(value);
+      return true;
+    }),
+
+  check("email")
+    .optional()
+    .isEmail()
+    .withMessage("Email must be valid")
+    .custom((value) =>
+      userModel.findOne({ email: value }).then((user) => {
+        if (user) {
+          return Promise.reject({ message: "E-Mail already exists", statusCode: 400 });
+        }
+      })
+    ),
+
+  check("phone")
+    .optional()
+    .isMobilePhone(["ar-EG", "ar-SA", "en-US"])
+    .withMessage("Phone must be a valid EG, SA, or US number"),
+
+  check("dob")
+    .optional()
+    .isISO8601()
+    .withMessage("Date of birth must be a valid date (e.g. 1995-06-15)")
+    .custom((value) => {
+      if (new Date(value) >= new Date()) {
+        throw new Error("Date of birth must be in the past");
+      }
+      return true;
+    }),
+
+  check("profileImage").optional(),
+
+  validatorMiddleWare,
+];
+
 exports.changePasswordValidator = [
   check("currentPassword")
     .notEmpty()
