@@ -21,6 +21,7 @@ exports.updateMyData = asyncHandler(async (req, res, next) => {
       email: req.body.email,
       phone: req.body.phone,
       profileImage: req.body.profileImage,
+      dob: req.body.dob,
     },
     {
       new: true,
