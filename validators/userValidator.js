@@ -157,10 +157,19 @@ exports.updateMyDataValidator = [
 
   check("dob")
     .optional()
-    .isISO8601()
-    .withMessage("Date of birth must be a valid date (e.g. 1995-06-15)")
     .custom((value) => {
-      if (new Date(value) >= new Date()) {
+      // Accept ISO (1995-06-15) or DD/MM/YYYY (18/11/2004)
+      let date;
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+        const [day, month, year] = value.split("/");
+        date = new Date(`${year}-${month}-${day}`);
+      } else {
+        date = new Date(value);
+      }
+      if (isNaN(date.getTime())) {
+        throw new Error("Date of birth must be a valid date (e.g. 18/11/2004 or 1995-06-15)");
+      }
+      if (date >= new Date()) {
         throw new Error("Date of birth must be in the past");
       }
       return true;

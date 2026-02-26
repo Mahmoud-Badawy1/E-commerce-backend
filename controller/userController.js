@@ -14,6 +14,12 @@ exports.getMyData = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateMyData = asyncHandler(async (req, res, next) => {
+  // Normalise dob: accept DD/MM/YYYY or ISO format
+  if (req.body.dob && /^\d{2}\/\d{2}\/\d{4}$/.test(req.body.dob)) {
+    const [day, month, year] = req.body.dob.split("/");
+    req.body.dob = `${year}-${month}-${day}`;
+  }
+
   const document = await userModel.findByIdAndUpdate(
     req.user._id,
     {
